@@ -1,0 +1,12 @@
+{
+  "domain": "my_frontier_silicon",
+  "name": "My Frontier Silicon",
+  "codeowners": ["@SaintPaddy"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/SaintPaddy/my-frontier-silicon",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/SaintPaddy/my-frontier-silicon/issues",
+  "requirements": ["aiohttp>=3.8.0"],
+  "version": "0.0.2"
+}
