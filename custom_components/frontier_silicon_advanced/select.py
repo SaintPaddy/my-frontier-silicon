@@ -22,10 +22,14 @@ async def async_setup_entry(
     """Set up Frontier Silicon select entities."""
     coordinator: FrontierSiliconCoordinator = hass.data[DOMAIN][entry.entry_id]
     
-    # Load presets
+    # Load presets and modes
     await coordinator.get_presets()
+    await coordinator.get_modes()
     
-    async_add_entities([FrontierSiliconPresetSelect(coordinator, entry)])
+    async_add_entities([
+        FrontierSiliconPresetSelect(coordinator, entry),
+        FrontierSiliconModeSelect(coordinator, entry),
+    ])
 
 
 class FrontierSiliconPresetSelect(CoordinatorEntity, SelectEntity):
@@ -94,3 +98,94 @@ class FrontierSiliconPresetSelect(CoordinatorEntity, SelectEntity):
         """Update the entity."""
         await super().async_update()
         self._update_preset_map()
+
+
+class FrontierSiliconModeSelect(CoordinatorEntity, SelectEntity):
+    """Select entity for choosing input mode."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "mode"
+
+    def __init__(
+        self, coordinator: FrontierSiliconCoordinator, entry: ConfigEntry
+    ) -> None:
+        """Initialize the select entity."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_mode_select"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+        )
+        self._mode_map: dict[str, str] = {}
+        self._update_mode_map()
+
+    @callback
+    def _update_mode_map(self) -> None:
+        """Update the mode mapping."""
+        if hasattr(self.coordinator, "_modes"):
+            self._mode_map = {}
+            for mode in self.coordinator._modes:
+                key = mode.get("key", "")
+                name = mode.get("label") or mode.get("name", "")
+                
+                if name:
+                    self._mode_map[name] = key
+
+    @property
+    def options(self) -> list[str]:
+        """Return list of available modes."""
+        self._update_mode_map()
+        return list(self._mode_map.keys())
+
+    @property
+    def current_option(self) -> str | None:
+        """Return the current mode."""
+        mode_id = self.coordinator.data.get("mode")
+        if mode_id is None:
+            return None
+        
+        # Find mode name from ID
+        for name, key in self._mode_map.items():
+            if key == mode_id:
+                return name
+        
+        return None
+
+    @property
+    def icon(self) -> str:
+        """Return the icon based on current mode."""
+        mode_name = self.current_option
+        if mode_name:
+            mode_lower = mode_name.lower()
+            if "internet" in mode_lower or "radio" in mode_lower:
+                return "mdi:radio"
+            elif "spotify" in mode_lower:
+                return "mdi:spotify"
+            elif "bluetooth" in mode_lower:
+                return "mdi:bluetooth"
+            elif "dab" in mode_lower:
+                return "mdi:radio-tower"
+            elif "fm" in mode_lower:
+                return "mdi:radio-fm"
+            elif "cd" in mode_lower:
+                return "mdi:disc"
+            elif "usb" in mode_lower:
+                return "mdi:usb"
+            elif "aux" in mode_lower or "audio in" in mode_lower:
+                return "mdi:aux"
+        
+        return "mdi:import"
+
+    async def async_select_option(self, option: str) -> None:
+        """Select a mode."""
+        mode_key = self._mode_map.get(option)
+        if mode_key is not None:
+            _LOGGER.info("Switching to mode: %s (key: %s)", option, mode_key)
+            await self.coordinator.api.set_mode(mode_key)
+            await self.coordinator.async_request_refresh()
+        else:
+            _LOGGER.error("Mode %s not found", option)
+
+    async def async_update(self) -> None:
+        """Update the entity."""
+        await super().async_update()
+        self._update_mode_map()

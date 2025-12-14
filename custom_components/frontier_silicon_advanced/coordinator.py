@@ -43,7 +43,15 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
         """Fetch data from API."""
         try:
             # Get power state
-            power, _ = await self.api.get_value("netRemote.sys.power")
+            power, status = await self.api.get_value("netRemote.sys.power")
+            
+            # If we can't get power state, device might be unavailable
+            if status in ("NO_SESSION", "XML_PARSE_ERROR"):
+                _LOGGER.debug("Device appears offline or unreachable (status: %s)", status)
+                return {
+                    "power": False,
+                    "available": False,
+                }
             
             data = {
                 "power": power == "1",
@@ -84,29 +92,54 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
             return data
             
         except Exception as err:
-            _LOGGER.error("Error communicating with device: %s", err)
-            raise UpdateFailed(f"Error communicating with device: {err}") from err
+            # Only log at warning level for expected errors
+            _LOGGER.warning("Error communicating with device: %s", err)
+            # Return unavailable state instead of raising
+            return {
+                "power": False,
+                "available": False,
+            }
 
     async def async_shutdown(self) -> None:
         """Shutdown coordinator."""
         await self.api.close()
 
+    async def async_config_entry_first_refresh(self) -> None:
+        """Perform first refresh and load initial data."""
+        # Load modes and presets on startup
+        _LOGGER.info("Loading modes and presets on startup")
+        self._modes = await self.api.get_modes()
+        self._presets = await self.api.get_presets()
+        _LOGGER.info("Loaded %d modes and %d presets", len(self._modes), len(self._presets))
+        
+        # Then do normal first refresh
+        await super().async_config_entry_first_refresh()
+
     async def get_modes(self) -> list[dict[str, str]]:
         """Get available modes (cached)."""
-        if not hasattr(self, "_modes"):
+        if not hasattr(self, "_modes") or not self._modes:
+            _LOGGER.debug("Modes not cached, fetching from device")
             self._modes = await self.api.get_modes()
         return self._modes
 
     async def get_presets(self) -> list[dict[str, str]]:
         """Get presets (cached)."""
-        if not hasattr(self, "_presets"):
+        if not hasattr(self, "_presets") or not self._presets:
+            _LOGGER.debug("Presets not cached, fetching from device")
             self._presets = await self.api.get_presets()
         return self._presets
 
     async def refresh_presets(self) -> None:
         """Force refresh of presets."""
+        _LOGGER.info("Refreshing presets from device")
         self._presets = await self.api.get_presets()
+        _LOGGER.info("Loaded %d presets", len(self._presets))
+        # Trigger UI update
+        await self.async_request_refresh()
 
     async def refresh_modes(self) -> None:
         """Force refresh of modes."""
+        _LOGGER.info("Refreshing modes from device")
         self._modes = await self.api.get_modes()
+        # Trigger UI update
+        await self.async_request_refresh()

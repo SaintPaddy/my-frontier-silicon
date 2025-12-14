@@ -36,10 +36,17 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     _LOGGER.info("Unloading My Frontier Silicon integration")
     
+    # Get coordinator
+    coordinator = hass.data[DOMAIN].get(entry.entry_id)
+    
     # Unload platforms
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     
     if unload_ok:
+        # Shutdown coordinator and close API session
+        if coordinator:
+            _LOGGER.info("Closing API session")
+            await coordinator.async_shutdown()
         hass.data[DOMAIN].pop(entry.entry_id)
     
     return unload_ok

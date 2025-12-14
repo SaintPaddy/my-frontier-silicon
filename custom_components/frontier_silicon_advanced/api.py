@@ -43,18 +43,36 @@ class FrontierSiliconAPI:
         try:
             session = await self._get_session()
             async with session.get(url, timeout=aiohttp.ClientTimeout(total=timeout)) as response:
+                # Check response status
+                if response.status != 200:
+                    _LOGGER.debug("HTTP %d for %s", response.status, url)
+                    return None, ""
+                
                 text = await response.text()
+                
+                # Check for empty response
+                if not text or not text.strip():
+                    _LOGGER.debug("Empty response from device")
+                    return None, ""
+                
+                # Try to parse XML
                 try:
                     root = ET.fromstring(text)
                     return root, text
                 except ET.ParseError as err:
-                    _LOGGER.error("XML parse error: %s", err)
+                    # Only log at debug level - this is common when radio is in standby
+                    _LOGGER.debug("XML parse error: %s (response: %s)", err, text[:100])
                     return None, text
+                    
         except asyncio.TimeoutError:
-            _LOGGER.error("Request timeout: %s", url)
+            _LOGGER.debug("Request timeout: %s", url)
+            return None, ""
+        except aiohttp.ClientError as err:
+            _LOGGER.debug("Connection error: %s", err)
             return None, ""
         except Exception as err:
-            _LOGGER.error("Request error: %s", err)
+            # Only log unexpected errors at error level
+            _LOGGER.error("Unexpected request error: %s", err)
             return None, ""
 
     def _get_status(self, root: Optional[ET.Element]) -> str:
