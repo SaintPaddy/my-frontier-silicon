@@ -1,117 +1,39 @@
-# Changelog
+# Changelog - My Frontier Silicon
 
-All notable changes to the My Frontier Silicon integration will be documented in this file.
+All notable changes to this integration will be documented in this file.
 
-## [1.0.0] - 2024-12-14
+## [0.0.3] - 2024-12-15
 
-### 🎉 Initial Release
+### 🎉 MEGA FEATURE RELEASE!
 
-#### Added
-- Complete media player entity with full control
-  - Power on/off
-  - Volume control (set, up, down)
-  - Mute/unmute
-  - Source/mode selection
-  - Play/pause/stop controls
-  - Next/previous track
-  - Album art display
-- Select entity for preset/station selection
-  - Dropdown with all saved presets
-  - Automatic filtering of unnamed presets
-  - Smart mode switching (auto-switches to Internet Radio)
-- Sensor entities
-  - Current mode display with smart icons
-  - Current station/track information
-  - Additional attributes for extended info
-- Button entity
-  - Refresh presets button
-  - Updates preset list without reloading integration
-- Config flow for easy setup via UI
-  - Connection testing
-  - Automatic device discovery
-  - PIN validation
-  - Smart port handling (omits :80 from URLs)
-- Comprehensive error handling
-  - Session management with auto-reconnection
-  - Timeout handling
-  - Clear error messages
-- Full async support
-  - Efficient polling with coordinator
-  - Non-blocking operations
-  - Proper cleanup on unload
-- HACS compatibility
-  - Custom repository support
-  - Automatic updates
-  - Version tracking
-- Complete documentation
-  - README with examples
-  - Installation guide
-  - Troubleshooting section
-- Multi-language support (EN)
-- Device info with proper identification
-- Support for all Frontier Silicon devices
-  - Majority Homerton series
-  - Roberts Stream series
-  - Hama radios
-  - And many more!
+This is a **major update** with tons of new features based on your radio's capabilities!
 
-### Features Tested On
-- ✅ Majority Homerton 2
-- ✅ Firmware: V4.5.21
-- ✅ All modes: Internet Radio, DAB+, FM, Spotify, Bluetooth, CD, USB, AUX
-- ✅ Preset selection working
-- ✅ Volume control (33 steps)
-- ✅ Mode switching
-- ✅ Station metadata
-- ✅ Album art URLs
+### ✨ New Features
 
-### Technical Details
-- Integration domain: `my_frontier_silicon`
-- Platform: Home Assistant 2024.1+
-- Dependencies: aiohttp
-- Update interval: 30 seconds
-- Session refresh: Every 9 minutes
-- Supported platforms: media_player, select, sensor, button
+**1. Multi-Mode Smart Preset Selector** ⭐⭐⭐
+- **30 presets across all modes!** (Internet Radio, DAB+, FM)
+- One unified dropdown with all your stations
+- Format: `[Radio] 1LIVE`, `[DAB+] Bremen Vier`, `[FM] 89.3 MHz`
+- **Auto mode-switching:** Click any preset and it automatically switches to the right mode!
+- **Excludes empty presets:** Only shows stations you've actually saved
 
-### Known Limitations
-- Pause/Next/Prev may not work in Internet Radio mode (this is a radio limitation, not integration)
-- Multiroom features not implemented (device dependent)
-- Some advanced EQ settings not exposed (planned for future release)
+**2. Sleep Timer** ⭐⭐⭐
+- Beautiful slider: 0-120 minutes in 5-minute increments
+- Icon changes when active
 
-## [Unreleased]
+**3. EQ Preset Selector** ⭐⭐
+- 6 equalizer presets
 
-### Planned Features
-- 🎚️ EQ preset selector
-- ⏰ Sleep timer entity
-- 📡 Signal strength sensor
-- 🔊 Audio enhancement controls
-- 🌐 Network info sensors
-- 📻 DAB scan button
-- 🎨 Theme presets
-- 🔔 Notification support
+**4. Full Spotify & Bluetooth** ⭐⭐
+- Quick mode switches
 
-### Considering
-- MQTT discovery support
-- Custom services for advanced features
-- Lovelace card plugin
-- Multiple device grouping
-- Scene support
+**5. WiFi Network Sensors** ⭐
+- Signal, IP, MAC, SSID
 
----
+### 📊 Complete: 14 entities total
 
-## Version History
+## [0.0.2] - 2024-12-14
+- Bug fixes
 
-### Semantic Versioning
-This project follows [Semantic Versioning](https://semver.org/):
-- MAJOR version for incompatible API changes
-- MINOR version for backwards-compatible functionality
-- PATCH version for backwards-compatible bug fixes
-
-### Release Schedule
-- Bug fixes: As needed
-- Feature updates: Monthly
-- Major versions: Quarterly (if needed)
-
----
-
-[1.0.0]: https://github.com/SaintPaddy/my-frontier-silicon/releases/tag/v1.0.0
+## [0.0.1] - 2024-12-14
+- Initial release
