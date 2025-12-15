@@ -33,10 +33,26 @@
   "entity": {
     "select": {
       "preset": {
-        "name": "Radio Preset"
+        "name": "Preset"
       },
       "mode": {
         "name": "Input Mode"
+      },
+      "equalizer": {
+        "name": "Equalizer"
+      }
+    },
+    "number": {
+      "sleep_timer": {
+        "name": "Sleep Timer"
+      }
+    },
+    "switch": {
+      "bluetooth_mode": {
+        "name": "Bluetooth Mode"
+      },
+      "spotify_mode": {
+        "name": "Spotify Mode"
       }
     },
     "button": {
@@ -50,6 +66,18 @@
       },
       "current_station": {
         "name": "Current Station"
+      },
+      "wifi_signal": {
+        "name": "WiFi Signal"
+      },
+      "ip_address": {
+        "name": "IP Address"
+      },
+      "mac_address": {
+        "name": "MAC Address"
+      },
+      "wifi_ssid": {
+        "name": "WiFi SSID"
       }
     }
   }
