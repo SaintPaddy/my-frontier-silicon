@@ -9,7 +9,14 @@ from .coordinator import FrontierSiliconCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = [Platform.MEDIA_PLAYER, Platform.SELECT, Platform.BUTTON, Platform.SENSOR]
+PLATFORMS = [
+    Platform.MEDIA_PLAYER,
+    Platform.SELECT,
+    Platform.NUMBER,
+    Platform.SENSOR,
+    Platform.SWITCH,
+    Platform.BUTTON,
+]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

@@ -25,6 +25,10 @@ async def async_setup_entry(
     async_add_entities([
         FrontierSiliconModeSensor(coordinator, entry),
         FrontierSiliconStationSensor(coordinator, entry),
+        FrontierSiliconWiFiSignalSensor(coordinator, entry),
+        FrontierSiliconIPAddressSensor(coordinator, entry),
+        FrontierSiliconMACAddressSensor(coordinator, entry),
+        FrontierSiliconSSIDSensor(coordinator, entry),
     ])
 
 
@@ -126,3 +130,140 @@ class FrontierSiliconStationSensor(CoordinatorEntity, SensorEntity):
     def icon(self) -> str:
         """Return the icon."""
         return "mdi:music-circle"
+
+
+class FrontierSiliconWiFiSignalSensor(CoordinatorEntity, SensorEntity):
+    """Sensor showing WiFi signal strength."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "wifi_signal"
+    _attr_device_class = SensorDeviceClass.SIGNAL_STRENGTH
+    _attr_native_unit_of_measurement = "dBm"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self, coordinator: FrontierSiliconCoordinator, entry: ConfigEntry
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_wifi_signal"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+        )
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the WiFi signal strength."""
+        rssi = self.coordinator.data.get("wifi_rssi")
+        if rssi:
+            try:
+                return int(rssi)
+            except (ValueError, TypeError):
+                pass
+        return None
+
+    @property
+    def icon(self) -> str:
+        """Return the icon based on signal strength."""
+        if self.native_value:
+            if self.native_value >= -50:
+                return "mdi:wifi-strength-4"
+            elif self.native_value >= -60:
+                return "mdi:wifi-strength-3"
+            elif self.native_value >= -70:
+                return "mdi:wifi-strength-2"
+            else:
+                return "mdi:wifi-strength-1"
+        return "mdi:wifi-strength-outline"
+
+
+class FrontierSiliconIPAddressSensor(CoordinatorEntity, SensorEntity):
+    """Sensor showing IP address."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "ip_address"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self, coordinator: FrontierSiliconCoordinator, entry: ConfigEntry
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_ip_address"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the IP address."""
+        ip_int = self.coordinator.data.get("ip_address")
+        if ip_int:
+            try:
+                # Convert integer to IP address (e.g., 168299294 -> 10.8.11.30)
+                ip_num = int(ip_int)
+                return f"{(ip_num >> 24) & 0xFF}.{(ip_num >> 16) & 0xFF}.{(ip_num >> 8) & 0xFF}.{ip_num & 0xFF}"
+            except (ValueError, TypeError):
+                pass
+        return None
+
+    @property
+    def icon(self) -> str:
+        """Return the icon."""
+        return "mdi:ip-network"
+
+
+class FrontierSiliconMACAddressSensor(CoordinatorEntity, SensorEntity):
+    """Sensor showing MAC address."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "mac_address"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self, coordinator: FrontierSiliconCoordinator, entry: ConfigEntry
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_mac_address"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the MAC address."""
+        return self.coordinator.data.get("mac_address")
+
+    @property
+    def icon(self) -> str:
+        """Return the icon."""
+        return "mdi:network"
+
+
+class FrontierSiliconSSIDSensor(CoordinatorEntity, SensorEntity):
+    """Sensor showing connected WiFi SSID."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "wifi_ssid"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self, coordinator: FrontierSiliconCoordinator, entry: ConfigEntry
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_wifi_ssid"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the WiFi SSID."""
+        return self.coordinator.data.get("wifi_ssid")
+
+    @property
+    def icon(self) -> str:
+        """Return the icon."""
+        return "mdi:wifi"

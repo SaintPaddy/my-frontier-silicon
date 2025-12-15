@@ -1,4 +1,5 @@
 """Data coordinator for My Frontier Silicon integration."""
+import asyncio
 import logging
 from datetime import timedelta
 from typing import Any
@@ -76,6 +77,18 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
                 # Get volume steps for percentage calculation
                 volume_steps, _ = await self.api.get_value("netRemote.sys.caps.volumeSteps")
                 
+                # Get sleep timer
+                sleep_timer, _ = await self.api.get_value("netRemote.sys.sleep")
+                
+                # Get EQ preset
+                eq_preset, _ = await self.api.get_value("netRemote.sys.audio.eqPreset")
+                
+                # Get WiFi info
+                wifi_rssi, _ = await self.api.get_value("netRemote.sys.net.wlan.rssi")
+                wifi_ssid, _ = await self.api.get_value("netRemote.sys.net.wlan.connectedSSID")
+                ip_address, _ = await self.api.get_value("netRemote.sys.net.ipConfig.address")
+                mac_address, _ = await self.api.get_value("netRemote.sys.net.wlan.macAddress")
+                
                 data.update({
                     "volume": int(volume) if volume else 0,
                     "volume_steps": int(volume_steps) if volume_steps else 32,
@@ -87,6 +100,12 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
                     "artist": artist,
                     "album": album,
                     "graphic_uri": graphic_uri,
+                    "sleep_timer": int(sleep_timer) if sleep_timer else 0,
+                    "eq_preset": eq_preset,
+                    "wifi_rssi": wifi_rssi,
+                    "wifi_ssid": wifi_ssid,
+                    "ip_address": ip_address,
+                    "mac_address": mac_address,
                 })
             
             return data
@@ -106,14 +125,51 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
 
     async def async_config_entry_first_refresh(self) -> None:
         """Perform first refresh and load initial data."""
-        # Load modes and presets on startup
-        _LOGGER.info("Loading modes and presets on startup")
+        # Load modes first
+        _LOGGER.info("Loading modes on startup")
         self._modes = await self.api.get_modes()
-        self._presets = await self.api.get_presets()
-        _LOGGER.info("Loaded %d modes and %d presets", len(self._modes), len(self._presets))
+        _LOGGER.info("Loaded %d modes", len(self._modes))
+        
+        # Load presets for all modes (Internet Radio, DAB+, FM)
+        _LOGGER.info("Loading presets for all modes")
+        self._all_presets = {}
+        
+        for mode in ["0", "3", "4"]:  # Internet Radio, DAB+, FM
+            mode_presets = await self._load_presets_for_mode(mode)
+            if mode_presets:
+                self._all_presets[mode] = mode_presets
+                _LOGGER.info("Loaded %d presets for mode %s", len(mode_presets), mode)
         
         # Then do normal first refresh
         await super().async_config_entry_first_refresh()
+    
+    async def _load_presets_for_mode(self, mode_id: str) -> list[dict[str, str]]:
+        """Load presets for a specific mode."""
+        try:
+            # Switch to mode
+            await self.api.set_mode(mode_id)
+            await asyncio.sleep(0.5)
+            
+            # Navigate and get presets
+            await self.api.set_value("netRemote.nav.state", "1")
+            await asyncio.sleep(0.3)
+            
+            presets = await self.api.get_presets()
+            return presets
+        except Exception as err:
+            _LOGGER.warning("Error loading presets for mode %s: %s", mode_id, err)
+            return []
+    
+    async def get_all_presets(self) -> dict[str, list[dict[str, str]]]:
+        """Get all presets for all modes."""
+        if not hasattr(self, "_all_presets") or not self._all_presets:
+            _LOGGER.debug("All presets not cached, loading")
+            self._all_presets = {}
+            for mode in ["0", "3", "4"]:
+                presets = await self._load_presets_for_mode(mode)
+                if presets:
+                    self._all_presets[mode] = presets
+        return self._all_presets
 
     async def get_modes(self) -> list[dict[str, str]]:
         """Get available modes (cached)."""
