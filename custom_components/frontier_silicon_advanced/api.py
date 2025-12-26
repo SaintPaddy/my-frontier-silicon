@@ -199,7 +199,18 @@ class FrontierSiliconAPI:
 
     async def get_presets(self) -> list[dict[str, str]]:
         """Get saved presets/favorites."""
-        return await self.list_get_next("netRemote.nav.presets", max_items=40)
+        # Navigate to preset list first (fixes FS_NODE_BLOCKED)
+        _LOGGER.debug("Navigating to preset list")
+        await self.set_value("netRemote.nav.state", "1")
+        
+        # Give radio time to update navigation state
+        await asyncio.sleep(0.3)
+        
+        # Now fetch presets
+        presets = await self.list_get_next("netRemote.nav.presets", max_items=40)
+        
+        _LOGGER.debug("Found %d presets", len(presets))
+        return presets
 
     async def power_on(self) -> bool:
         """Turn device on."""

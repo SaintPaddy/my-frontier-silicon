@@ -2,7 +2,7 @@
 
 All notable changes to this integration will be documented in this file.
 
-## [0.0.3] - 2024-12-15
+## [0.0.3] - 2024-12-14
 
 ### 🎉 MEGA FEATURE RELEASE!
 
