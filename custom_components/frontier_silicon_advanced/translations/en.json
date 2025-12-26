@@ -78,6 +78,18 @@
       },
       "wifi_ssid": {
         "name": "WiFi SSID"
+      },
+      "sleep_remaining": {
+        "name": "Sleep Timer Remaining"
+      },
+      "firmware_version": {
+        "name": "Firmware Version"
+      },
+      "device_model": {
+        "name": "Device Model"
+      },
+      "volume_percent": {
+        "name": "Volume"
       }
     }
   }

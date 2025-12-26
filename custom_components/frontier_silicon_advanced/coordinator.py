@@ -107,6 +107,10 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
                     "ip_address": ip_address,
                     "mac_address": mac_address,
                 })
+                
+                # Add cached device info (fetched once at startup)
+                if hasattr(self, "_device_info"):
+                    data.update(self._device_info)
             
             return data
             
@@ -125,6 +129,20 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
 
     async def async_config_entry_first_refresh(self) -> None:
         """Perform first refresh and load initial data."""
+        # Load device info (only once at startup)
+        _LOGGER.info("Loading device information")
+        try:
+            firmware_version, _ = await self.api.get_value("netRemote.sys.info.version")
+            device_model, _ = await self.api.get_value("netRemote.sys.info.friendlyName")
+            self._device_info = {
+                "firmware_version": firmware_version,
+                "device_model": device_model,
+            }
+            _LOGGER.info("Device: %s, Firmware: %s", device_model, firmware_version)
+        except Exception as err:
+            _LOGGER.warning("Error loading device info: %s", err)
+            self._device_info = {}
+        
         # Load modes first
         _LOGGER.info("Loading modes on startup")
         self._modes = await self.api.get_modes()

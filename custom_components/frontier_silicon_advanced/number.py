@@ -54,8 +54,10 @@ class FrontierSiliconSleepTimer(CoordinatorEntity, NumberEntity):
         sleep_value = self.coordinator.data.get("sleep_timer")
         if sleep_value is not None:
             try:
-                # Convert to minutes (API might be in seconds or minutes, adjust if needed)
-                return float(sleep_value)
+                # API returns seconds, convert to minutes for display
+                seconds = int(sleep_value)
+                minutes = round(seconds / 60.0)
+                return float(minutes)
             except (ValueError, TypeError):
                 pass
         return 0
@@ -70,10 +72,14 @@ class FrontierSiliconSleepTimer(CoordinatorEntity, NumberEntity):
     async def async_set_native_value(self, value: float) -> None:
         """Set the sleep timer value."""
         minutes = int(value)
-        _LOGGER.info("Setting sleep timer to: %d minutes", minutes)
         
-        # Set sleep timer (value in minutes)
-        await self.coordinator.api.set_value("netRemote.sys.sleep", str(minutes))
+        # Convert minutes to seconds for API (API uses seconds!)
+        seconds = minutes * 60
         
-        # Refresh coordinator
+        _LOGGER.info("Setting sleep timer to: %d minutes (%d seconds)", minutes, seconds)
+        
+        # Set sleep timer (value in seconds)
+        await self.coordinator.api.set_value("netRemote.sys.sleep", str(seconds))
+        
+        # Refresh coordinator immediately
         await self.coordinator.async_request_refresh()

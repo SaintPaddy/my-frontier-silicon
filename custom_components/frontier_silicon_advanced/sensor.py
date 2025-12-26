@@ -29,6 +29,10 @@ async def async_setup_entry(
         FrontierSiliconIPAddressSensor(coordinator, entry),
         FrontierSiliconMACAddressSensor(coordinator, entry),
         FrontierSiliconSSIDSensor(coordinator, entry),
+        FrontierSiliconSleepRemainingSensor(coordinator, entry),
+        FrontierSiliconFirmwareVersionSensor(coordinator, entry),
+        FrontierSiliconDeviceModelSensor(coordinator, entry),
+        FrontierSiliconVolumePercentSensor(coordinator, entry),
     ])
 
 
@@ -157,7 +161,22 @@ class FrontierSiliconWiFiSignalSensor(CoordinatorEntity, SensorEntity):
         rssi = self.coordinator.data.get("wifi_rssi")
         if rssi:
             try:
-                return int(rssi)
+                rssi_int = int(rssi)
+                
+                # Skip if 0 (invalid/not available)
+                if rssi_int == 0:
+                    return None
+                
+                # Convert from unsigned to signed if value > 127
+                # (Some APIs return RSSI as unsigned 8-bit: 0-255)
+                if rssi_int > 127:
+                    rssi_int = rssi_int - 256
+                
+                # Sanity check: RSSI should be negative
+                if rssi_int > 0:
+                    rssi_int = -rssi_int
+                
+                return rssi_int
             except (ValueError, TypeError):
                 pass
         return None
@@ -267,3 +286,164 @@ class FrontierSiliconSSIDSensor(CoordinatorEntity, SensorEntity):
     def icon(self) -> str:
         """Return the icon."""
         return "mdi:wifi"
+
+
+class FrontierSiliconSleepRemainingSensor(CoordinatorEntity, SensorEntity):
+    """Sensor showing remaining sleep time."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "sleep_remaining"
+    _attr_native_unit_of_measurement = "min"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self, coordinator: FrontierSiliconCoordinator, entry: ConfigEntry
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_sleep_remaining"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+        )
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the remaining sleep time in minutes."""
+        sleep_seconds = self.coordinator.data.get("sleep_timer")
+        if sleep_seconds:
+            try:
+                seconds = int(sleep_seconds)
+                if seconds > 0:
+                    minutes = round(seconds / 60.0)
+                    return minutes
+            except (ValueError, TypeError):
+                pass
+        return None
+
+    @property
+    def icon(self) -> str:
+        """Return the icon."""
+        if self.native_value and self.native_value > 0:
+            return "mdi:timer-sand"
+        return "mdi:timer-off"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, any]:
+        """Return additional attributes."""
+        attrs = {}
+        
+        sleep_seconds = self.coordinator.data.get("sleep_timer")
+        if sleep_seconds:
+            try:
+                seconds = int(sleep_seconds)
+                if seconds > 0:
+                    attrs["seconds_remaining"] = seconds
+                    attrs["formatted"] = f"{seconds // 60}:{seconds % 60:02d}"
+            except (ValueError, TypeError):
+                pass
+        
+        return attrs
+
+
+class FrontierSiliconFirmwareVersionSensor(CoordinatorEntity, SensorEntity):
+    """Sensor showing firmware version."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "firmware_version"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self, coordinator: FrontierSiliconCoordinator, entry: ConfigEntry
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_firmware_version"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the firmware version."""
+        return self.coordinator.data.get("firmware_version")
+
+    @property
+    def icon(self) -> str:
+        """Return the icon."""
+        return "mdi:chip"
+
+
+class FrontierSiliconDeviceModelSensor(CoordinatorEntity, SensorEntity):
+    """Sensor showing device model."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "device_model"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self, coordinator: FrontierSiliconCoordinator, entry: ConfigEntry
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_device_model"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the device model."""
+        return self.coordinator.data.get("device_model")
+
+    @property
+    def icon(self) -> str:
+        """Return the icon."""
+        return "mdi:radio"
+
+
+class FrontierSiliconVolumePercentSensor(CoordinatorEntity, SensorEntity):
+    """Sensor showing volume as percentage."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "volume_percent"
+    _attr_native_unit_of_measurement = "%"
+
+    def __init__(
+        self, coordinator: FrontierSiliconCoordinator, entry: ConfigEntry
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_volume_percent"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+        )
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the volume as percentage."""
+        volume = self.coordinator.data.get("volume")
+        volume_steps = self.coordinator.data.get("volume_steps", 32)
+        
+        if volume is not None and volume_steps:
+            try:
+                volume_int = int(volume)
+                steps_int = int(volume_steps)
+                if steps_int > 0:
+                    percentage = round((volume_int / steps_int) * 100)
+                    return percentage
+            except (ValueError, TypeError, ZeroDivisionError):
+                pass
+        return None
+
+    @property
+    def icon(self) -> str:
+        """Return the icon based on volume level."""
+        volume = self.native_value
+        if volume is None or volume == 0:
+            return "mdi:volume-off"
+        elif volume < 33:
+            return "mdi:volume-low"
+        elif volume < 66:
+            return "mdi:volume-medium"
+        else:
+            return "mdi:volume-high"
