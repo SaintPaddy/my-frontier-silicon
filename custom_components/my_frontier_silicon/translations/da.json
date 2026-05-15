@@ -23,9 +23,19 @@
   "options": {
     "step": {
       "init": {
-        "title": "Frontier Silicon-indstillinger",
+        "title": "Integrationsindstillinger",
+        "description": "Konfigurer integrationens adfærd og ydeevne",
         "data": {
-          "pin": "PIN-kode"
+          "debug_logging": "Aktivér debug-logning",
+          "auto_load_presets": "Indlæs favoritter automatisk når radioen tændes",
+          "scan_interval_off": "Scaninterval når OFF (sekunder)",
+          "scan_interval_on": "Scaninterval når ON (sekunder)"
+        },
+        "data_description": {
+          "debug_logging": "Vis detaljerede debug-beskeder i logfiler. Aktivér ved fejlsøgning.",
+          "auto_load_presets": "Indlæs alle radiofavoritter automatisk når radioen tændes. Deaktivér for kun at indlæse ved manuel opdatering.",
+          "scan_interval_off": "Hvor ofte der skal kontrolleres om radioen er tændt (30-300 sekunder). Højere = mindre netværkstrafik.",
+          "scan_interval_on": "Hvor ofte sanginformation opdateres under afspilning (10-60 sekunder). Lavere = mere responsiv."
         }
       }
     }
@@ -58,6 +68,9 @@
     "button": {
       "refresh_presets": {
         "name": "Opdater forudindstillinger"
+      },
+      "force_power_probe": {
+        "name": "Gennemtving strømkontrol"
       }
     },
     "sensor": {
