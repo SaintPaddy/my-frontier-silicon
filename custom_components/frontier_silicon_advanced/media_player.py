@@ -181,7 +181,20 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
         """Turn the media player on."""
         await self.coordinator.api.power_on()
         
-        # If presets weren't loaded at startup (radio was off), load them now
+        # If device info and presets weren't loaded at startup (radio was off), load them now
+        if not self.coordinator._device_info:
+            _LOGGER.info("Loading device info after first power-on")
+            try:
+                firmware_version, _ = await self.coordinator.api.get_value("netRemote.sys.info.version")
+                device_model, _ = await self.coordinator.api.get_value("netRemote.sys.info.friendlyName")
+                self.coordinator._device_info = {
+                    "firmware_version": firmware_version,
+                    "device_model": device_model,
+                }
+                _LOGGER.info("Device: %s, Firmware: %s", device_model, firmware_version)
+            except Exception as err:
+                _LOGGER.warning("Error loading device info on power-on: %s", err)
+        
         if not self.coordinator._all_presets:
             _LOGGER.info("Loading presets after first power-on")
             try:
