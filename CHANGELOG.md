@@ -6,7 +6,7 @@ All notable changes to this integration will be documented in this file.
 
 ### 🐛 Critical Fix
 
-**Radio No Longer Turns On During HA Restart!** ⭐⭐⭐
+**Radio No Longer Turns On During HA Restart** ⭐⭐⭐
 - **Fixed:** Radio automatically turning on when Home Assistant restarts
 - **Root cause:** Integration was loading presets/modes on startup, which switched radio modes and woke it up
 - **Solution:** Power state is now checked FIRST before loading any data
@@ -20,12 +20,22 @@ All notable changes to this integration will be documented in this file.
 - Presets are lazy-loaded on first manual power-on if needed
 - No user-facing changes - all features still work the same!
 
-### ✅ All v0.0.4 Features Included
-- Sleep timer working correctly (minutes not seconds)
-- WiFi signal fixed (-45 dBm display)
-- Sleep countdown sensor
-- Volume percentage sensor
-- Device info sensors (model, firmware)
+### 🌍 Multi-Language Support ⭐⭐⭐
+
+**10 Languages Added!**
+- 🇩🇪 **German** (Deutsch) Thanks to @MGKQB
+- 🇳🇱 **Dutch** (Nederlands) Thanks to AI - feel free to give me a Pull Request if you have a better translation
+- 🇫🇷 **French** (Français) Thanks to AI - feel free to give me a Pull Request if you have a better translation
+- 🇪🇸 **Spanish** (Español) Thanks to AI - feel free to give me a Pull Request if you have a better translation
+- 🇮🇹 **Italian** (Italiano) Thanks to AI - feel free to give me a Pull Request if you have a better translation
+- 🇵🇱 **Polish** (Polski) Thanks to AI - feel free to give me a Pull Request if you have a better translation
+- 🇵🇹 **Portuguese** (Português) Thanks to AI - feel free to give me a Pull Request if you have a better translation
+- 🇸🇪 **Swedish** (Svenska) Thanks to AI - feel free to give me a Pull Request if you have a better translation
+- 🇳🇴 **Norwegian** (Norsk) Thanks to AI - feel free to give me a Pull Request if you have a better translation
+- 🇩🇰 **Danish** (Dansk) Thanks to AI - feel free to give me a Pull Request if you have a better translation
+
+All entity names, config flow, and UI text are now translated!
+Home Assistant automatically uses your system language.
 
 ---
 
