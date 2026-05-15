@@ -120,7 +120,7 @@ class FrontierSiliconOptionsFlowHandler(config_entries.OptionsFlow):
                     ): vol.All(vol.Coerce(int), vol.Range(min=30, max=300)),
                     vol.Optional(
                         "scan_interval_on",
-                        default=self.config_entry.options.get("scan_interval_on", 30),
+                        default=self.config_entry.options.get("scan_interval_on", 15),
                     ): vol.All(vol.Coerce(int), vol.Range(min=10, max=60)),
                 }
             ),
