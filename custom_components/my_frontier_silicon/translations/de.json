@@ -23,9 +23,19 @@
   "options": {
     "step": {
       "init": {
-        "title": "Frontier Silicon-Optionen",
+        "title": "Integrationsoptionen",
+        "description": "Verhalten und Leistung der Integration konfigurieren",
         "data": {
-          "pin": "PIN-Code"
+          "debug_logging": "Debug-Protokollierung aktivieren",
+          "auto_load_presets": "Favoriten automatisch laden wenn Radio eingeschaltet wird",
+          "scan_interval_off": "Scanintervall wenn AUS (Sekunden)",
+          "scan_interval_on": "Scanintervall wenn AN (Sekunden)"
+        },
+        "data_description": {
+          "debug_logging": "Detaillierte Debug-Meldungen in Protokollen anzeigen. Bei Fehlersuche aktivieren.",
+          "auto_load_presets": "Alle Radiofavoriten automatisch laden wenn Radio eingeschaltet wird. Deaktivieren um nur bei manueller Aktualisierung zu laden.",
+          "scan_interval_off": "Wie oft geprüft wird ob Radio eingeschaltet ist (30-300 Sekunden). Höher = weniger Netzwerkverkehr.",
+          "scan_interval_on": "Wie oft Song-Informationen während Wiedergabe aktualisiert werden (10-60 Sekunden). Niedriger = reaktionsschneller."
         }
       }
     }
@@ -58,6 +68,9 @@
     "button": {
       "refresh_presets": {
         "name": "Favoriten aktualisieren"
+      },
+      "force_power_probe": {
+        "name": "Stromstatus prüfen"
       }
     },
     "sensor": {

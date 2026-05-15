@@ -23,9 +23,19 @@
   "options": {
     "step": {
       "init": {
-        "title": "Options Frontier Silicon",
+        "title": "Options d'intégration",
+        "description": "Configurer le comportement et les performances de l'intégration",
         "data": {
-          "pin": "Code PIN"
+          "debug_logging": "Activer la journalisation de débogage",
+          "auto_load_presets": "Charger automatiquement les favoris lors de l'allumage de la radio",
+          "scan_interval_off": "Intervalle de scan quand ÉTEINT (secondes)",
+          "scan_interval_on": "Intervalle de scan quand ALLUMÉ (secondes)"
+        },
+        "data_description": {
+          "debug_logging": "Afficher les messages de débogage détaillés dans les journaux. Activer lors du dépannage.",
+          "auto_load_presets": "Charger automatiquement tous les favoris radio lors de l'allumage. Désactiver pour charger uniquement lors du rafraîchissement manuel.",
+          "scan_interval_off": "Fréquence de vérification si la radio est allumée (30-300 secondes). Plus élevé = moins de trafic réseau.",
+          "scan_interval_on": "Fréquence de mise à jour des informations de chanson pendant la lecture (10-60 secondes). Plus bas = plus réactif."
         }
       }
     }
@@ -58,6 +68,9 @@
     "button": {
       "refresh_presets": {
         "name": "Actualiser les présélections"
+      },
+      "force_power_probe": {
+        "name": "Vérifier l'état d'alimentation"
       }
     },
     "sensor": {

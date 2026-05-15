@@ -23,9 +23,19 @@
   "options": {
     "step": {
       "init": {
-        "title": "Frontier Silicon-alternativ",
+        "title": "Integrationsalternativ",
+        "description": "Konfigurera integrationsbeteende och prestanda",
         "data": {
-          "pin": "PIN-kod"
+          "debug_logging": "Aktivera felsökningsloggning",
+          "auto_load_presets": "Ladda favoriter automatiskt när radion slås på",
+          "scan_interval_off": "Skanningsintervall när AV (sekunder)",
+          "scan_interval_on": "Skanningsintervall när PÅ (sekunder)"
+        },
+        "data_description": {
+          "debug_logging": "Visa detaljerade felsökningsmeddelanden i loggar. Aktivera vid felsökning.",
+          "auto_load_presets": "Ladda automatiskt alla radiofavoriter när radion slås på. Inaktivera för att endast ladda vid manuell uppdatering.",
+          "scan_interval_off": "Hur ofta det kontrolleras om radion är påslagen (30-300 sekunder). Högre = mindre nätverkstrafik.",
+          "scan_interval_on": "Hur ofta låtinformation uppdateras under uppspelning (10-60 sekunder). Lägre = mer responsiv."
         }
       }
     }
@@ -58,6 +68,9 @@
     "button": {
       "refresh_presets": {
         "name": "Uppdatera förinställningar"
+      },
+      "force_power_probe": {
+        "name": "Kontrollera strömstatus"
       }
     },
     "sensor": {

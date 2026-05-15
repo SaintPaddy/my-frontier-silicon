@@ -23,9 +23,19 @@
   "options": {
     "step": {
       "init": {
-        "title": "Frontier Silicon Options",
+        "title": "Integration Options",
+        "description": "Configure integration behavior and performance",
         "data": {
-          "pin": "PIN Code"
+          "debug_logging": "Enable debug logging",
+          "auto_load_presets": "Automatically load presets when radio turns on",
+          "scan_interval_off": "Scan interval when OFF (seconds)",
+          "scan_interval_on": "Scan interval when ON (seconds)"
+        },
+        "data_description": {
+          "debug_logging": "Show detailed debug messages in logs. Enable when troubleshooting.",
+          "auto_load_presets": "Load all radio presets automatically when radio powers on. Disable to load only when manually refreshing.",
+          "scan_interval_off": "How often to check if radio powered on (30-300 seconds). Higher = less network traffic.",
+          "scan_interval_on": "How often to update song info when playing (10-60 seconds). Lower = more responsive."
         }
       }
     }
@@ -58,6 +68,9 @@
     "button": {
       "refresh_presets": {
         "name": "Refresh Presets"
+      },
+      "force_power_probe": {
+        "name": "Check Power State"
       }
     },
     "sensor": {

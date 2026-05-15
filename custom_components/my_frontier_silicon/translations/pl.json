@@ -23,9 +23,19 @@
   "options": {
     "step": {
       "init": {
-        "title": "Opcje Frontier Silicon",
+        "title": "Opcje integracji",
+        "description": "Skonfiguruj zachowanie i wydajność integracji",
         "data": {
-          "pin": "Kod PIN"
+          "debug_logging": "Włącz logowanie debugowania",
+          "auto_load_presets": "Automatycznie wczytuj ulubione przy włączaniu radia",
+          "scan_interval_off": "Interwał skanowania gdy WYŁĄCZONE (sekundy)",
+          "scan_interval_on": "Interwał skanowania gdy WŁĄCZONE (sekundy)"
+        },
+        "data_description": {
+          "debug_logging": "Pokazuj szczegółowe komunikaty debugowania w logach. Włącz podczas rozwiązywania problemów.",
+          "auto_load_presets": "Automatycznie wczytuj wszystkie ulubione radiowe przy włączaniu. Wyłącz aby wczytywać tylko przy ręcznym odświeżaniu.",
+          "scan_interval_off": "Jak często sprawdzać czy radio jest włączone (30-300 sekund). Wyższe = mniej ruchu sieciowego.",
+          "scan_interval_on": "Jak często aktualizować informacje o utworze podczas odtwarzania (10-60 sekund). Niższe = bardziej responsywne."
         }
       }
     }
@@ -58,6 +68,9 @@
     "button": {
       "refresh_presets": {
         "name": "Odśwież ulubione"
+      },
+      "force_power_probe": {
+        "name": "Wymuś sprawdzenie zasilania"
       }
     },
     "sensor": {

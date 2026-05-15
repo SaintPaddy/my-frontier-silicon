@@ -23,9 +23,19 @@
   "options": {
     "step": {
       "init": {
-        "title": "Frontier Silicon-alternativer",
+        "title": "Integrasjonsalternativer",
+        "description": "Konfigurer integrasjonsadferd og ytelse",
         "data": {
-          "pin": "PIN-kode"
+          "debug_logging": "Aktiver feilsøkingslogging",
+          "auto_load_presets": "Last inn favoritter automatisk når radioen slås på",
+          "scan_interval_off": "Skanneintervall når AV (sekunder)",
+          "scan_interval_on": "Skanneintervall når PÅ (sekunder)"
+        },
+        "data_description": {
+          "debug_logging": "Vis detaljerte feilsøkingsmeldinger i logger. Aktiver ved feilsøking.",
+          "auto_load_presets": "Last inn alle radiofavoritter automatisk når radioen slås på. Deaktiver for å bare laste ved manuell oppdatering.",
+          "scan_interval_off": "Hvor ofte det sjekkes om radioen er slått på (30-300 sekunder). Høyere = mindre nettverkstrafikk.",
+          "scan_interval_on": "Hvor ofte sanginformasjon oppdateres under avspilling (10-60 sekunder). Lavere = mer responsiv."
         }
       }
     }
@@ -58,6 +68,9 @@
     "button": {
       "refresh_presets": {
         "name": "Oppdater forhåndsinnstillinger"
+      },
+      "force_power_probe": {
+        "name": "Tving strømkontroll"
       }
     },
     "sensor": {

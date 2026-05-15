@@ -23,9 +23,19 @@
   "options": {
     "step": {
       "init": {
-        "title": "Opções Frontier Silicon",
+        "title": "Opções de integração",
+        "description": "Configurar comportamento e desempenho da integração",
         "data": {
-          "pin": "Código PIN"
+          "debug_logging": "Ativar registro de depuração",
+          "auto_load_presets": "Carregar favoritos automaticamente ao ligar o rádio",
+          "scan_interval_off": "Intervalo de verificação quando DESLIGADO (segundos)",
+          "scan_interval_on": "Intervalo de verificação quando LIGADO (segundos)"
+        },
+        "data_description": {
+          "debug_logging": "Mostrar mensagens detalhadas de depuração nos registros. Ativar ao solucionar problemas.",
+          "auto_load_presets": "Carregar automaticamente todos os favoritos de rádio ao ligar. Desativar para carregar apenas ao atualizar manualmente.",
+          "scan_interval_off": "Com que frequência verificar se o rádio está ligado (30-300 segundos). Maior = menos tráfego de rede.",
+          "scan_interval_on": "Com que frequência atualizar informações da música durante reprodução (10-60 segundos). Menor = mais responsivo."
         }
       }
     }
@@ -58,6 +68,9 @@
     "button": {
       "refresh_presets": {
         "name": "Atualizar predefinições"
+      },
+      "force_power_probe": {
+        "name": "Forçar verificação de energia"
       }
     },
     "sensor": {

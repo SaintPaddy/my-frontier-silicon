@@ -23,9 +23,19 @@
   "options": {
     "step": {
       "init": {
-        "title": "Frontier Silicon-opties",
+        "title": "Integratie-opties",
+        "description": "Configureer integratie gedrag en prestaties",
         "data": {
-          "pin": "Pincode"
+          "debug_logging": "Debug-logging inschakelen",
+          "auto_load_presets": "Voorkeuzezenders automatisch laden bij inschakelen van radio",
+          "scan_interval_off": "Scaninterval wanneer UIT (seconden)",
+          "scan_interval_on": "Scaninterval wanneer AAN (seconden)"
+        },
+        "data_description": {
+          "debug_logging": "Gedetailleerde debug-berichten in logboeken weergeven. Inschakelen bij probleemoplossing.",
+          "auto_load_presets": "Alle radiovoorkeuzezenders automatisch laden bij inschakelen. Uitschakelen om alleen bij handmatig vernieuwen te laden.",
+          "scan_interval_off": "Hoe vaak wordt gecontroleerd of radio is ingeschakeld (30-300 seconden). Hoger = minder netwerkverkeer.",
+          "scan_interval_on": "Hoe vaak nummerinformatie wordt bijgewerkt tijdens afspelen (10-60 seconden). Lager = responsiever."
         }
       }
     }
@@ -58,6 +68,9 @@
     "button": {
       "refresh_presets": {
         "name": "Voorkeuzes vernieuwen"
+      },
+      "force_power_probe": {
+        "name": "Stroomcontrole forceren"
       }
     },
     "sensor": {

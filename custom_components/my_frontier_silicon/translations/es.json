@@ -23,9 +23,19 @@
   "options": {
     "step": {
       "init": {
-        "title": "Opciones de Frontier Silicon",
+        "title": "Opciones de integración",
+        "description": "Configurar comportamiento y rendimiento de la integración",
         "data": {
-          "pin": "Código PIN"
+          "debug_logging": "Habilitar registro de depuración",
+          "auto_load_presets": "Cargar favoritos automáticamente al encender la radio",
+          "scan_interval_off": "Intervalo de escaneo cuando APAGADO (segundos)",
+          "scan_interval_on": "Intervalo de escaneo cuando ENCENDIDO (segundos)"
+        },
+        "data_description": {
+          "debug_logging": "Mostrar mensajes de depuración detallados en registros. Habilitar al solucionar problemas.",
+          "auto_load_presets": "Cargar todos los favoritos de radio automáticamente al encender. Deshabilitar para cargar solo al actualizar manualmente.",
+          "scan_interval_off": "Frecuencia de comprobación si la radio está encendida (30-300 segundos). Mayor = menos tráfico de red.",
+          "scan_interval_on": "Frecuencia de actualización de información de canción durante reproducción (10-60 segundos). Menor = más receptivo."
         }
       }
     }
@@ -58,6 +68,9 @@
     "button": {
       "refresh_presets": {
         "name": "Actualizar preajustes"
+      },
+      "force_power_probe": {
+        "name": "Comprobar estado de energía"
       }
     },
     "sensor": {
