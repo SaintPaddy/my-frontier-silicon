@@ -129,6 +129,16 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
 
     async def async_config_entry_first_refresh(self) -> None:
         """Perform first refresh and load initial data."""
+        # CRITICAL FIX: Check if radio is already on BEFORE loading anything
+        # This prevents waking the radio during HA restart!
+        _LOGGER.info("Checking radio power state before loading data")
+        try:
+            power_state, _ = await self.api.get_value("netRemote.sys.power")
+            radio_is_on = power_state == "1"
+        except Exception as err:
+            _LOGGER.warning("Could not check power state: %s", err)
+            radio_is_on = False
+        
         # Load device info (only once at startup)
         _LOGGER.info("Loading device information")
         try:
@@ -143,20 +153,31 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
             _LOGGER.warning("Error loading device info: %s", err)
             self._device_info = {}
         
-        # Load modes first
-        _LOGGER.info("Loading modes on startup")
-        self._modes = await self.api.get_modes()
-        _LOGGER.info("Loaded %d modes", len(self._modes))
-        
-        # Load presets for all modes (Internet Radio, DAB+, FM)
-        _LOGGER.info("Loading presets for all modes")
-        self._all_presets = {}
-        
-        for mode in ["0", "3", "4"]:  # Internet Radio, DAB+, FM
-            mode_presets = await self._load_presets_for_mode(mode)
-            if mode_presets:
-                self._all_presets[mode] = mode_presets
-                _LOGGER.info("Loaded %d presets for mode %s", len(mode_presets), mode)
+        # Only load modes and presets if radio is ALREADY powered on
+        # This prevents waking the radio during HA restart!
+        if radio_is_on:
+            _LOGGER.info("Radio is ON - loading modes and presets")
+            
+            # Load modes first
+            _LOGGER.info("Loading modes on startup")
+            self._modes = await self.api.get_modes()
+            _LOGGER.info("Loaded %d modes", len(self._modes))
+            
+            # Load presets for all modes (Internet Radio, DAB+, FM)
+            _LOGGER.info("Loading presets for all modes")
+            self._all_presets = {}
+            
+            for mode in ["0", "3", "4"]:  # Internet Radio, DAB+, FM
+                mode_presets = await self._load_presets_for_mode(mode)
+                if mode_presets:
+                    self._all_presets[mode] = mode_presets
+                    _LOGGER.info("Loaded %d presets for mode %s", len(mode_presets), mode)
+        else:
+            _LOGGER.info("Radio is OFF - skipping preset loading to prevent wake-up")
+            _LOGGER.info("Presets will be loaded when radio is first turned on")
+            # Initialize empty structures
+            self._modes = {}
+            self._all_presets = {}
         
         # Then do normal first refresh
         await super().async_config_entry_first_refresh()
