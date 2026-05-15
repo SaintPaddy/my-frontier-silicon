@@ -1,0 +1,96 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Agregar dispositivo Frontier Silicon",
+        "description": "Ingrese los detalles de conexión de su dispositivo Frontier Silicon (ej. Majority Homerton, Roberts Stream, etc.)",
+        "data": {
+          "host": "Dirección IP",
+          "port": "Puerto",
+          "pin": "Código PIN",
+          "name": "Nombre del dispositivo"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Error al conectar con el dispositivo. Verifique la dirección IP, el puerto y el código PIN.",
+      "unknown": "Ocurrió un error inesperado."
+    },
+    "abort": {
+      "already_configured": "Este dispositivo ya está configurado."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opciones de Frontier Silicon",
+        "data": {
+          "pin": "Código PIN"
+        }
+      }
+    }
+  },
+  "entity": {
+    "select": {
+      "preset": {
+        "name": "Favorito"
+      },
+      "mode": {
+        "name": "Modo de entrada"
+      },
+      "equalizer": {
+        "name": "Ecualizador"
+      }
+    },
+    "number": {
+      "sleep_timer": {
+        "name": "Temporizador de apagado"
+      }
+    },
+    "switch": {
+      "bluetooth_mode": {
+        "name": "Modo Bluetooth"
+      },
+      "spotify_mode": {
+        "name": "Modo Spotify"
+      }
+    },
+    "button": {
+      "refresh_presets": {
+        "name": "Actualizar preajustes"
+      }
+    },
+    "sensor": {
+      "current_mode": {
+        "name": "Modo actual"
+      },
+      "current_station": {
+        "name": "Estación actual"
+      },
+      "wifi_signal": {
+        "name": "Señal WiFi"
+      },
+      "ip_address": {
+        "name": "Dirección IP"
+      },
+      "mac_address": {
+        "name": "Dirección MAC"
+      },
+      "wifi_ssid": {
+        "name": "SSID WiFi"
+      },
+      "sleep_remaining": {
+        "name": "Tiempo de sueño restante"
+      },
+      "firmware_version": {
+        "name": "Versión de firmware"
+      },
+      "device_model": {
+        "name": "Modelo del dispositivo"
+      },
+      "volume_percent": {
+        "name": "Volumen"
+      }
+    }
+  }
+}

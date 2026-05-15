@@ -1,0 +1,96 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Legg til Frontier Silicon-enhet",
+        "description": "Skriv inn tilkoblingsdetaljer for Frontier Silicon-enheten (f.eks. Majority Homerton, Roberts Stream, etc.)",
+        "data": {
+          "host": "IP-adresse",
+          "port": "Port",
+          "pin": "PIN-kode",
+          "name": "Enhetsnavn"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kunne ikke koble til enheten. Sjekk IP-adressen, porten og PIN-koden.",
+      "unknown": "En uventet feil oppstod."
+    },
+    "abort": {
+      "already_configured": "Denne enheten er allerede konfigurert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Frontier Silicon-alternativer",
+        "data": {
+          "pin": "PIN-kode"
+        }
+      }
+    }
+  },
+  "entity": {
+    "select": {
+      "preset": {
+        "name": "Favoritt"
+      },
+      "mode": {
+        "name": "Inngangsmodus"
+      },
+      "equalizer": {
+        "name": "Equalizer"
+      }
+    },
+    "number": {
+      "sleep_timer": {
+        "name": "Sovetimer"
+      }
+    },
+    "switch": {
+      "bluetooth_mode": {
+        "name": "Bluetooth-modus"
+      },
+      "spotify_mode": {
+        "name": "Spotify-modus"
+      }
+    },
+    "button": {
+      "refresh_presets": {
+        "name": "Oppdater forhåndsinnstillinger"
+      }
+    },
+    "sensor": {
+      "current_mode": {
+        "name": "Gjeldende modus"
+      },
+      "current_station": {
+        "name": "Gjeldende stasjon"
+      },
+      "wifi_signal": {
+        "name": "WiFi-signal"
+      },
+      "ip_address": {
+        "name": "IP-adresse"
+      },
+      "mac_address": {
+        "name": "MAC-adresse"
+      },
+      "wifi_ssid": {
+        "name": "WiFi-SSID"
+      },
+      "sleep_remaining": {
+        "name": "Gjenværende sovetid"
+      },
+      "firmware_version": {
+        "name": "Firmware-versjon"
+      },
+      "device_model": {
+        "name": "Enhetsmodell"
+      },
+      "volume_percent": {
+        "name": "Volum"
+      }
+    }
+  }
+}

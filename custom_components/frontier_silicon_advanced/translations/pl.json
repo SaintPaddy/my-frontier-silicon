@@ -1,0 +1,96 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Dodaj urządzenie Frontier Silicon",
+        "description": "Wprowadź szczegóły połączenia dla urządzenia Frontier Silicon (np. Majority Homerton, Roberts Stream, itp.)",
+        "data": {
+          "host": "Adres IP",
+          "port": "Port",
+          "pin": "Kod PIN",
+          "name": "Nazwa urządzenia"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Nie udało się połączyć z urządzeniem. Sprawdź adres IP, port i kod PIN.",
+      "unknown": "Wystąpił nieoczekiwany błąd."
+    },
+    "abort": {
+      "already_configured": "To urządzenie jest już skonfigurowane."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcje Frontier Silicon",
+        "data": {
+          "pin": "Kod PIN"
+        }
+      }
+    }
+  },
+  "entity": {
+    "select": {
+      "preset": {
+        "name": "Ulubione"
+      },
+      "mode": {
+        "name": "Tryb wejścia"
+      },
+      "equalizer": {
+        "name": "Korektor"
+      }
+    },
+    "number": {
+      "sleep_timer": {
+        "name": "Timer uśpienia"
+      }
+    },
+    "switch": {
+      "bluetooth_mode": {
+        "name": "Tryb Bluetooth"
+      },
+      "spotify_mode": {
+        "name": "Tryb Spotify"
+      }
+    },
+    "button": {
+      "refresh_presets": {
+        "name": "Odśwież ulubione"
+      }
+    },
+    "sensor": {
+      "current_mode": {
+        "name": "Bieżący tryb"
+      },
+      "current_station": {
+        "name": "Aktualna stacja"
+      },
+      "wifi_signal": {
+        "name": "Sygnał WiFi"
+      },
+      "ip_address": {
+        "name": "Adres IP"
+      },
+      "mac_address": {
+        "name": "Adres MAC"
+      },
+      "wifi_ssid": {
+        "name": "SSID WiFi"
+      },
+      "sleep_remaining": {
+        "name": "Pozostały czas uśpienia"
+      },
+      "firmware_version": {
+        "name": "Wersja oprogramowania"
+      },
+      "device_model": {
+        "name": "Model urządzenia"
+      },
+      "volume_percent": {
+        "name": "Głośność"
+      }
+    }
+  }
+}

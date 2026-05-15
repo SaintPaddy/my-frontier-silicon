@@ -1,0 +1,96 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Lägg till Frontier Silicon-enhet",
+        "description": "Ange anslutningsuppgifter för din Frontier Silicon-enhet (t.ex. Majority Homerton, Roberts Stream, etc.)",
+        "data": {
+          "host": "IP-adress",
+          "port": "Port",
+          "pin": "PIN-kod",
+          "name": "Enhetsnamn"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kunde inte ansluta till enheten. Kontrollera IP-adressen, porten och PIN-koden.",
+      "unknown": "Ett oväntat fel uppstod."
+    },
+    "abort": {
+      "already_configured": "Denna enhet är redan konfigurerad."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Frontier Silicon-alternativ",
+        "data": {
+          "pin": "PIN-kod"
+        }
+      }
+    }
+  },
+  "entity": {
+    "select": {
+      "preset": {
+        "name": "Favorit"
+      },
+      "mode": {
+        "name": "Läge"
+      },
+      "equalizer": {
+        "name": "Equalizer"
+      }
+    },
+    "number": {
+      "sleep_timer": {
+        "name": "Insomningstimer"
+      }
+    },
+    "switch": {
+      "bluetooth_mode": {
+        "name": "Bluetooth-läge"
+      },
+      "spotify_mode": {
+        "name": "Spotify-läge"
+      }
+    },
+    "button": {
+      "refresh_presets": {
+        "name": "Uppdatera förinställningar"
+      }
+    },
+    "sensor": {
+      "current_mode": {
+        "name": "Aktuellt läge"
+      },
+      "current_station": {
+        "name": "Aktuell station"
+      },
+      "wifi_signal": {
+        "name": "WiFi-signal"
+      },
+      "ip_address": {
+        "name": "IP-adress"
+      },
+      "mac_address": {
+        "name": "MAC-adress"
+      },
+      "wifi_ssid": {
+        "name": "WiFi-SSID"
+      },
+      "sleep_remaining": {
+        "name": "Återstående sovtid"
+      },
+      "firmware_version": {
+        "name": "Firmware-version"
+      },
+      "device_model": {
+        "name": "Enhetsmodell"
+      },
+      "volume_percent": {
+        "name": "Volym"
+      }
+    }
+  }
+}

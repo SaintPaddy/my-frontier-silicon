@@ -1,0 +1,96 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Tilføj Frontier Silicon-enhed",
+        "description": "Indtast forbindelsesoplysninger for din Frontier Silicon-enhed (f.eks. Majority Homerton, Roberts Stream, etc.)",
+        "data": {
+          "host": "IP-adresse",
+          "port": "Port",
+          "pin": "PIN-kode",
+          "name": "Enhedsnavn"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kunne ikke forbinde til enheden. Kontroller IP-adressen, porten og PIN-koden.",
+      "unknown": "Der opstod en uventet fejl."
+    },
+    "abort": {
+      "already_configured": "Denne enhed er allerede konfigureret."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Frontier Silicon-indstillinger",
+        "data": {
+          "pin": "PIN-kode"
+        }
+      }
+    }
+  },
+  "entity": {
+    "select": {
+      "preset": {
+        "name": "Favorit"
+      },
+      "mode": {
+        "name": "Tilstand"
+      },
+      "equalizer": {
+        "name": "Equalizer"
+      }
+    },
+    "number": {
+      "sleep_timer": {
+        "name": "Søvntimer"
+      }
+    },
+    "switch": {
+      "bluetooth_mode": {
+        "name": "Bluetooth-tilstand"
+      },
+      "spotify_mode": {
+        "name": "Spotify-tilstand"
+      }
+    },
+    "button": {
+      "refresh_presets": {
+        "name": "Opdater forudindstillinger"
+      }
+    },
+    "sensor": {
+      "current_mode": {
+        "name": "Aktuel tilstand"
+      },
+      "current_station": {
+        "name": "Aktuel station"
+      },
+      "wifi_signal": {
+        "name": "WiFi-signal"
+      },
+      "ip_address": {
+        "name": "IP-adresse"
+      },
+      "mac_address": {
+        "name": "MAC-adresse"
+      },
+      "wifi_ssid": {
+        "name": "WiFi-SSID"
+      },
+      "sleep_remaining": {
+        "name": "Resterende søvntid"
+      },
+      "firmware_version": {
+        "name": "Firmware-version"
+      },
+      "device_model": {
+        "name": "Enhedsmodel"
+      },
+      "volume_percent": {
+        "name": "Lydstyrke"
+      }
+    }
+  }
+}

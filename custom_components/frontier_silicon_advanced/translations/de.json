@@ -1,0 +1,96 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Frontier Silicon Gerät hinzufügen",
+        "description": "Geben Sie die Verbindungsdetails für Ihr Frontier Silicon Gerät ein (z.B. Majority Homerton, Roberts Stream, Technisat DIGITRADIO IR usw.)",
+        "data": {
+          "host": "IP-Adresse",
+          "port": "Port",
+          "pin": "PIN-Code",
+          "name": "Gerätename"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zum Gerät fehlgeschlagen. Bitte überprüfen Sie die IP-Adresse, den Port und den PIN-Code.",
+      "unknown": "Ein unerwarteter Fehler ist aufgetreten."
+    },
+    "abort": {
+      "already_configured": "Dieses Gerät ist bereits konfiguriert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Frontier Silicon-Optionen",
+        "data": {
+          "pin": "PIN-Code"
+        }
+      }
+    }
+  },
+  "entity": {
+    "select": {
+      "preset": {
+        "name": "Favorit"
+      },
+      "mode": {
+        "name": "Modus"
+      },
+      "equalizer": {
+        "name": "Equalizer"
+      }
+    },
+    "number": {
+      "sleep_timer": {
+        "name": "Einschlaftimer"
+      }
+    },
+    "switch": {
+      "bluetooth_mode": {
+        "name": "Bluetooth-Modus"
+      },
+      "spotify_mode": {
+        "name": "Spotify-Modus"
+      }
+    },
+    "button": {
+      "refresh_presets": {
+        "name": "Favoriten aktualisieren"
+      }
+    },
+    "sensor": {
+      "current_mode": {
+        "name": "Aktueller Modus"
+      },
+      "current_station": {
+        "name": "Aktueller Sender"
+      },
+      "wifi_signal": {
+        "name": "WiFi-Signal"
+      },
+      "ip_address": {
+        "name": "IP-Adresse"
+      },
+      "mac_address": {
+        "name": "MAC-Adresse"
+      },
+      "wifi_ssid": {
+        "name": "WiFi-SSID"
+      },
+      "sleep_remaining": {
+        "name": "Verbleibende Einschlafzeit"
+      },
+      "firmware_version": {
+        "name": "Firmware-Version"
+      },
+      "device_model": {
+        "name": "Gerätemodell"
+      },
+      "volume_percent": {
+        "name": "Lautstärke"
+      }
+    }
+  }
+}

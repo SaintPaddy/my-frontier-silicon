@@ -1,0 +1,96 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Frontier Silicon-apparaat toevoegen",
+        "description": "Voer de verbindingsgegevens van uw Frontier Silicon-apparaat in (bijv. Majority Homerton, Roberts Stream, enz.)",
+        "data": {
+          "host": "IP-adres",
+          "port": "Poort",
+          "pin": "Pincode",
+          "name": "Apparaatnaam"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kan geen verbinding maken met het apparaat. Controleer het IP-adres, de poort en de pincode.",
+      "unknown": "Er is een onverwachte fout opgetreden."
+    },
+    "abort": {
+      "already_configured": "Dit apparaat is al geconfigureerd."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Frontier Silicon-opties",
+        "data": {
+          "pin": "Pincode"
+        }
+      }
+    }
+  },
+  "entity": {
+    "select": {
+      "preset": {
+        "name": "Voorkeuzezender"
+      },
+      "mode": {
+        "name": "Invoermodus"
+      },
+      "equalizer": {
+        "name": "Equalizer"
+      }
+    },
+    "number": {
+      "sleep_timer": {
+        "name": "Slaaptimer"
+      }
+    },
+    "switch": {
+      "bluetooth_mode": {
+        "name": "Bluetooth-modus"
+      },
+      "spotify_mode": {
+        "name": "Spotify-modus"
+      }
+    },
+    "button": {
+      "refresh_presets": {
+        "name": "Voorkeuzes vernieuwen"
+      }
+    },
+    "sensor": {
+      "current_mode": {
+        "name": "Huidige modus"
+      },
+      "current_station": {
+        "name": "Huidige zender"
+      },
+      "wifi_signal": {
+        "name": "WiFi-signaal"
+      },
+      "ip_address": {
+        "name": "IP-adres"
+      },
+      "mac_address": {
+        "name": "MAC-adres"
+      },
+      "wifi_ssid": {
+        "name": "WiFi-SSID"
+      },
+      "sleep_remaining": {
+        "name": "Resterende slaaptimer"
+      },
+      "firmware_version": {
+        "name": "Firmwareversie"
+      },
+      "device_model": {
+        "name": "Apparaatmodel"
+      },
+      "volume_percent": {
+        "name": "Volume"
+      }
+    }
+  }
+}
