@@ -2,7 +2,7 @@
 
 All notable changes to this integration will be documented in this file.
 
-## [0.0.5] - 2026-05-15
+## [0.0.6.1] - 2026-05-15
 
 ### 🐛 Critical Fix
 
