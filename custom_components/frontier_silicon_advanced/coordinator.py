@@ -135,28 +135,29 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
         try:
             power_state, _ = await self.api.get_value("netRemote.sys.power")
             radio_is_on = power_state == "1"
+            _LOGGER.info("Radio power state: %s", "ON" if radio_is_on else "OFF")
         except Exception as err:
             _LOGGER.warning("Could not check power state: %s", err)
             radio_is_on = False
         
-        # Load device info (only once at startup)
-        _LOGGER.info("Loading device information")
-        try:
-            firmware_version, _ = await self.api.get_value("netRemote.sys.info.version")
-            device_model, _ = await self.api.get_value("netRemote.sys.info.friendlyName")
-            self._device_info = {
-                "firmware_version": firmware_version,
-                "device_model": device_model,
-            }
-            _LOGGER.info("Device: %s, Firmware: %s", device_model, firmware_version)
-        except Exception as err:
-            _LOGGER.warning("Error loading device info: %s", err)
-            self._device_info = {}
-        
-        # Only load modes and presets if radio is ALREADY powered on
+        # Only load modes, presets, AND device info if radio is ALREADY powered on
         # This prevents waking the radio during HA restart!
         if radio_is_on:
-            _LOGGER.info("Radio is ON - loading modes and presets")
+            _LOGGER.info("Radio is ON - loading device info, modes and presets")
+            
+            # Load device info (only once at startup, only if radio is on)
+            _LOGGER.info("Loading device information")
+            try:
+                firmware_version, _ = await self.api.get_value("netRemote.sys.info.version")
+                device_model, _ = await self.api.get_value("netRemote.sys.info.friendlyName")
+                self._device_info = {
+                    "firmware_version": firmware_version,
+                    "device_model": device_model,
+                }
+                _LOGGER.info("Device: %s, Firmware: %s", device_model, firmware_version)
+            except Exception as err:
+                _LOGGER.warning("Error loading device info: %s", err)
+                self._device_info = {}
             
             # Load modes first
             _LOGGER.info("Loading modes on startup")
@@ -173,9 +174,10 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
                     self._all_presets[mode] = mode_presets
                     _LOGGER.info("Loaded %d presets for mode %s", len(mode_presets), mode)
         else:
-            _LOGGER.info("Radio is OFF - skipping preset loading to prevent wake-up")
-            _LOGGER.info("Presets will be loaded when radio is first turned on")
+            _LOGGER.info("Radio is OFF - skipping ALL queries to prevent wake-up")
+            _LOGGER.info("Device info, modes and presets will be loaded when radio is first turned on")
             # Initialize empty structures
+            self._device_info = {}
             self._modes = {}
             self._all_presets = {}
         
