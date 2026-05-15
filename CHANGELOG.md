@@ -2,7 +2,34 @@
 
 All notable changes to this integration will be documented in this file.
 
-## [0.0.4] - 2024-12-26
+## [0.0.5] - 2026-05-15
+
+### 🐛 Critical Fix
+
+**Radio No Longer Turns On During HA Restart!** ⭐⭐⭐
+- **Fixed:** Radio automatically turning on when Home Assistant restarts
+- **Root cause:** Integration was loading presets/modes on startup, which switched radio modes and woke it up
+- **Solution:** Power state is now checked FIRST before loading any data
+  - If radio is OFF during HA startup → Skips preset loading, radio stays off ✅
+  - If radio is ON during HA startup → Loads presets normally ✅
+  - Presets are automatically loaded on first power-on if not loaded at startup ✅
+
+### 📝 Technical Details
+- Coordinator now checks power state before first refresh
+- Preset loading is skipped when radio is off (prevents mode switching that wakes radio)
+- Presets are lazy-loaded on first manual power-on if needed
+- No user-facing changes - all features still work the same!
+
+### ✅ All v0.0.4 Features Included
+- Sleep timer working correctly (minutes not seconds)
+- WiFi signal fixed (-45 dBm display)
+- Sleep countdown sensor
+- Volume percentage sensor
+- Device info sensors (model, firmware)
+
+---
+
+## [0.0.4] - 2025-12-26
 
 ### 🐛 Bug Fixes
 
@@ -82,7 +109,7 @@ All notable changes to this integration will be documented in this file.
 - Volume percentage: calculated from raw volume / volume steps
 - All new sensors properly categorized (diagnostic/standard)
 
-## [0.0.3] - 2024-12-14
+## [0.0.3] - 2025-12-14
 
 ### 🎉 MEGA FEATURE RELEASE!
 
@@ -112,8 +139,8 @@ This is a **major update** with tons of new features based on your radio's capab
 
 ### 📊 Complete: 14 entities total
 
-## [0.0.2] - 2024-12-14
+## [0.0.2] - 2025-12-14
 - Bug fixes
 
-## [0.0.1] - 2024-12-14
+## [0.0.1] - 2025-12-14
 - Initial release
