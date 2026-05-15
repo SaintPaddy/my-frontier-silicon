@@ -62,7 +62,7 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
         self._debug_logging = entry.options.get("debug_logging", False)
         self._auto_load_presets = entry.options.get("auto_load_presets", True)
         scan_interval_off = entry.options.get("scan_interval_off", 60)
-        scan_interval_on = entry.options.get("scan_interval_on", 30)
+        scan_interval_on = entry.options.get("scan_interval_on", 15)
         
         # Use appropriate scan interval based on power state
         # Will be updated dynamically
