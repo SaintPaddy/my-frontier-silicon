@@ -51,16 +51,16 @@ class FrontierSiliconConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     await self.async_set_unique_id(unique_id)
                     self._abort_if_unique_id_configured()
 
-					title = (
-						user_input.get(CONF_NAME)
-						or device_name
-						or f"Frontier Silicon {user_input[CONF_HOST]}"
-					)
+                    title = (
+                        user_input.get(CONF_NAME)
+                        or device_name
+                        or f"Frontier Silicon {user_input[CONF_HOST]}"
+                    )
 
-					return self.async_create_entry(
-						title=title,
-						data=user_input,
-					)
+                    return self.async_create_entry(
+                        title=title,
+                        data=user_input,
+                    )
                     
                 else:
                     errors["base"] = "cannot_connect"
@@ -77,7 +77,7 @@ class FrontierSiliconConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_HOST): str,
                     vol.Optional(CONF_PORT, default=DEFAULT_PORT): int,
                     vol.Optional(CONF_PIN, default=DEFAULT_PIN): str,
-					vol.Optional(CONF_NAME): str,
+                    vol.Optional(CONF_NAME): str,
                 }
             ),
             errors=errors,
