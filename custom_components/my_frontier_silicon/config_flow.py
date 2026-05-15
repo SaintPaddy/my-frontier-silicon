@@ -5,7 +5,7 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST, CONF_PORT
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_NAME
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 
@@ -51,10 +51,17 @@ class FrontierSiliconConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     await self.async_set_unique_id(unique_id)
                     self._abort_if_unique_id_configured()
 
-                    return self.async_create_entry(
-                        title=device_name or f"Frontier Silicon {user_input[CONF_HOST]}",
-                        data=user_input,
-                    )
+					title = (
+						user_input.get(CONF_NAME)
+						or device_name
+						or f"Frontier Silicon {user_input[CONF_HOST]}"
+					)
+
+					return self.async_create_entry(
+						title=title,
+						data=user_input,
+					)
+                    
                 else:
                     errors["base"] = "cannot_connect"
             except Exception as err:
@@ -70,6 +77,7 @@ class FrontierSiliconConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_HOST): str,
                     vol.Optional(CONF_PORT, default=DEFAULT_PORT): int,
                     vol.Optional(CONF_PIN, default=DEFAULT_PIN): str,
+					vol.Optional(CONF_NAME): str,
                 }
             ),
             errors=errors,
