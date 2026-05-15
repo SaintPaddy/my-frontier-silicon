@@ -35,10 +35,15 @@ async def async_setup_entry(
     """Set up Frontier Silicon select entities."""
     coordinator: FrontierSiliconCoordinator = hass.data[DOMAIN][entry.entry_id]
     
-    # Load presets and modes
-    await coordinator.get_all_presets()
-    await coordinator.get_modes()
+    # Only load presets and modes if they were loaded at startup
+    # (meaning radio was ON). If radio was OFF, they'll load on first power-on.
+    # Don't wake the radio just to populate select options!
+    if coordinator._all_presets:
+        _LOGGER.debug("Presets already loaded, using cached data")
+    else:
+        _LOGGER.info("Presets not loaded (radio was off at startup), select entities will populate on first power-on")
     
+    # Create entities regardless - they'll show empty options until radio is turned on
     async_add_entities([
         FrontierSiliconMultiModePresetSelect(coordinator, entry),
         FrontierSiliconModeSelect(coordinator, entry),
