@@ -11,7 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
-from .coordinator import FrontierSiliconCoordinator
+from .coordinator import FrontierSiliconCoordinator, raise_on_failure
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -126,15 +126,16 @@ class FrontierSiliconMultiModePresetSelect(CoordinatorEntity, SelectEntity):
         _LOGGER.info("Selecting preset: %s (mode: %s, key: %s)", option, mode_id, preset_key)
         
         # Switch to correct mode
-        await self.coordinator.api.set_mode(mode_id)
+        raise_on_failure(await self.coordinator.api.set_mode(mode_id), "set_mode")
         await asyncio.sleep(0.5)
         
         # Navigate to presets
-        await self.coordinator.api.set_value("netRemote.nav.state", "1")
+        status = await self.coordinator.api.set_value("netRemote.nav.state", "1")
+        raise_on_failure(status == "FS_OK", f"set netRemote.nav.state (status={status})")
         await asyncio.sleep(0.3)
         
         # Select preset
-        await self.coordinator.api.select_preset(preset_key)
+        raise_on_failure(await self.coordinator.api.select_preset(preset_key), "select_preset")
         
         # Refresh
         await self.coordinator.async_request_refresh()
@@ -225,7 +226,7 @@ class FrontierSiliconModeSelect(CoordinatorEntity, SelectEntity):
         mode_key = self._mode_map.get(option)
         if mode_key is not None:
             _LOGGER.info("Switching to mode: %s (key: %s)", option, mode_key)
-            await self.coordinator.api.set_mode(mode_key)
+            raise_on_failure(await self.coordinator.api.set_mode(mode_key), "set_mode")
             await self.coordinator.async_request_refresh()
         else:
             _LOGGER.error("Mode %s not found", option)
@@ -288,7 +289,8 @@ class FrontierSiliconEQSelect(CoordinatorEntity, SelectEntity):
         if match:
             eq_number = match.group(1)
             _LOGGER.info("Setting EQ preset to: %s", eq_number)
-            await self.coordinator.api.set_value("netRemote.sys.audio.eqPreset", eq_number)
+            status = await self.coordinator.api.set_value("netRemote.sys.audio.eqPreset", eq_number)
+            raise_on_failure(status == "FS_OK", f"set netRemote.sys.audio.eqPreset (status={status})")
             await self.coordinator.async_request_refresh()
         else:
             _LOGGER.error("Could not parse EQ preset: %s", option)

@@ -20,7 +20,7 @@ from .const import (
     PLAY_STATUS_STOPPED,
     PLAY_STATUS_BUFFERING,
 )
-from .coordinator import FrontierSiliconCoordinator
+from .coordinator import FrontierSiliconCoordinator, raise_on_failure
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -179,7 +179,7 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
 
     async def async_turn_on(self) -> None:
         """Turn the media player on."""
-        await self.coordinator.api.power_on()
+        raise_on_failure(await self.coordinator.api.power_on(), "power_on")
         
         # If device info and presets weren't loaded at startup (radio was off), load them now
         if not self.coordinator._device_info:
@@ -215,7 +215,7 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
 
     async def async_turn_off(self) -> None:
         """Turn the media player off."""
-        await self.coordinator.api.power_off()
+        raise_on_failure(await self.coordinator.api.power_off(), "power_off")
         await self.coordinator.async_request_refresh()
 
     async def async_set_volume_level(self, volume: float) -> None:
@@ -223,7 +223,7 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
         volume_steps = self.coordinator.data.get("volume_steps", 32)
         target_volume = int(volume * volume_steps)
         
-        await self.coordinator.api.set_volume(target_volume)
+        raise_on_failure(await self.coordinator.api.set_volume(target_volume), "set_volume")
         await self.coordinator.async_request_refresh()
 
     async def async_volume_up(self) -> None:
@@ -232,7 +232,7 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
         volume_steps = self.coordinator.data.get("volume_steps", 32)
         
         if current_volume < volume_steps:
-            await self.coordinator.api.set_volume(current_volume + 1)
+            raise_on_failure(await self.coordinator.api.set_volume(current_volume + 1), "set_volume")
             await self.coordinator.async_request_refresh()
 
     async def async_volume_down(self) -> None:
@@ -240,15 +240,15 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
         current_volume = self.coordinator.data.get("volume", 0)
         
         if current_volume > 0:
-            await self.coordinator.api.set_volume(current_volume - 1)
+            raise_on_failure(await self.coordinator.api.set_volume(current_volume - 1), "set_volume")
             await self.coordinator.async_request_refresh()
 
     async def async_mute_volume(self, mute: bool) -> None:
         """Mute (true) or unmute (false) media player."""
         if mute:
-            await self.coordinator.api.mute()
+            raise_on_failure(await self.coordinator.api.mute(), "mute")
         else:
-            await self.coordinator.api.unmute()
+            raise_on_failure(await self.coordinator.api.unmute(), "unmute")
         await self.coordinator.async_request_refresh()
 
     async def async_select_source(self, source: str) -> None:
@@ -259,7 +259,7 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
                 mode_name = mode.get("label") or mode.get("name")
                 if mode_name == source:
                     mode_id = mode.get("key")
-                    await self.coordinator.api.set_mode(mode_id)
+                    raise_on_failure(await self.coordinator.api.set_mode(mode_id), "set_mode")
                     await self.coordinator.async_request_refresh()
                     return
         
@@ -267,25 +267,25 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
 
     async def async_media_play(self) -> None:
         """Send play command."""
-        await self.coordinator.api.play()
+        raise_on_failure(await self.coordinator.api.play(), "play")
         await self.coordinator.async_request_refresh()
 
     async def async_media_pause(self) -> None:
         """Send pause command."""
-        await self.coordinator.api.pause()
+        raise_on_failure(await self.coordinator.api.pause(), "pause")
         await self.coordinator.async_request_refresh()
 
     async def async_media_stop(self) -> None:
         """Send stop command."""
-        await self.coordinator.api.stop()
+        raise_on_failure(await self.coordinator.api.stop(), "stop")
         await self.coordinator.async_request_refresh()
 
     async def async_media_next_track(self) -> None:
         """Send next track command."""
-        await self.coordinator.api.next_track()
+        raise_on_failure(await self.coordinator.api.next_track(), "next_track")
         await self.coordinator.async_request_refresh()
 
     async def async_media_previous_track(self) -> None:
         """Send previous track command."""
-        await self.coordinator.api.previous_track()
+        raise_on_failure(await self.coordinator.api.previous_track(), "previous_track")
         await self.coordinator.async_request_refresh()

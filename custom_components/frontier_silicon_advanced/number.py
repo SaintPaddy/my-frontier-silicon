@@ -9,7 +9,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
-from .coordinator import FrontierSiliconCoordinator
+from .coordinator import FrontierSiliconCoordinator, raise_on_failure
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -79,7 +79,8 @@ class FrontierSiliconSleepTimer(CoordinatorEntity, NumberEntity):
         _LOGGER.info("Setting sleep timer to: %d minutes (%d seconds)", minutes, seconds)
         
         # Set sleep timer (value in seconds)
-        await self.coordinator.api.set_value("netRemote.sys.sleep", str(seconds))
+        status = await self.coordinator.api.set_value("netRemote.sys.sleep", str(seconds))
+        raise_on_failure(status == "FS_OK", f"set netRemote.sys.sleep (status={status})")
         
         # Refresh coordinator immediately
         await self.coordinator.async_request_refresh()
