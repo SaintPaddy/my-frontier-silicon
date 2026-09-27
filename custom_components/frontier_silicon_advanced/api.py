@@ -1,7 +1,7 @@
 """API client for Frontier Silicon devices."""
 import asyncio
 import logging
-from typing import Any, Optional
+from typing import Optional
 import xml.etree.ElementTree as ET
 from urllib.parse import quote
 
@@ -198,14 +198,6 @@ class FrontierSiliconAPI:
 
         _LOGGER.info("FSAPI LIST_GET_NEXT %s returned %d items; context=%s", path, len(items), context)
         return items
-
-    async def get_device_info(self) -> dict[str, Any]:
-        """Get device information."""
-        info = {}
-        info["name"], _ = await self.get_value("netRemote.sys.info.friendlyName", context="device_info:name")
-        info["version"], _ = await self.get_value("netRemote.sys.info.version", context="device_info:version")
-        info["radio_id"], _ = await self.get_value("netRemote.sys.info.radioId", context="device_info:radio_id")
-        return info
 
     async def get_modes(self) -> list[dict[str, str]]:
         """Get available modes/input sources."""

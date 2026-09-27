@@ -43,8 +43,6 @@ class FrontierSiliconConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         "netRemote.sys.info.friendlyName",
                         context="config_flow_device_name"
                     )
-                    
-                    await api.close()
 
                     # Use device name or host as unique_id
                     unique_id = device_name or user_input[CONF_HOST]

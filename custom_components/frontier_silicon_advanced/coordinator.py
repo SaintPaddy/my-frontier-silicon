@@ -12,7 +12,6 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from .api import FrontierSiliconAPI
 from .const import (
     DOMAIN,
-    SCAN_INTERVAL,
     CONF_PIN,
     DEFAULT_PORT,
     DEFAULT_PIN,
@@ -56,7 +55,6 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
         self._device_info: dict[str, Any] = {}
         self._modes: list[dict[str, str]] = []
         self._all_presets: dict[str, list[dict[str, str]]] = {}
-        self._presets: list[dict[str, str]] = []
         
         # Get options with defaults
         self._debug_logging = entry.options.get("debug_logging", False)
@@ -203,7 +201,6 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
         self._device_info = {}
         self._modes = []
         self._all_presets = {}
-        self._presets = []
 
         radio_on, _ = await self._probe_power(
             context="startup_power_check",
@@ -312,27 +309,6 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
         self._log_debug("Modes not cached, fetching from device")
         self._modes = await self.api.get_modes()
         return self._modes
-
-    async def get_presets(self) -> list[dict[str, str]]:
-        """Get presets for current mode, guarded by current power state."""
-        if self._presets:
-            return self._presets
-        if not self._radio_is_known_on():
-            self._log_info("Preset load skipped: radio is OFF/not confirmed ON")
-            return self._presets
-        self._log_debug("Presets not cached, fetching from device")
-        self._presets = await self.api.get_presets()
-        return self._presets
-
-    async def refresh_presets(self) -> None:
-        """Force refresh of presets, but only when radio is confirmed ON."""
-        if not self._radio_is_known_on():
-            _LOGGER.warning("Manual preset refresh ignored: radio is OFF/not confirmed ON")
-            return
-        self._log_info("Refreshing presets from device")
-        self._presets = await self.api.get_presets()
-        self._log_info("Loaded %d presets", len(self._presets))
-        await self.async_request_refresh()
 
     async def refresh_modes(self) -> None:
         """Force refresh of modes, but only when radio is confirmed ON."""
