@@ -7,6 +7,7 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .api import FrontierSiliconAPI
@@ -45,13 +46,16 @@ DEFAULT_OFF_DATA: dict[str, Any] = {
 class FrontierSiliconCoordinator(DataUpdateCoordinator):
     """Class to manage fetching data from the Frontier Silicon device."""
 
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+    config_entry: "FrontierSiliconConfigEntry"
+
+    def __init__(self, hass: HomeAssistant, entry: "FrontierSiliconConfigEntry") -> None:
         """Initialize coordinator."""
         self.entry = entry
         self.api = FrontierSiliconAPI(
             host=entry.data[CONF_HOST],
             port=entry.data.get(CONF_PORT, DEFAULT_PORT),
             pin=entry.data.get(CONF_PIN, DEFAULT_PIN),
+            session=async_get_clientsession(hass),
         )
         self._device_info: dict[str, Any] = {}
         self._modes: list[dict[str, str]] = []
@@ -72,6 +76,7 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=entry,
             name=DOMAIN,
             update_interval=timedelta(seconds=scan_interval_off),  # Start with OFF interval
         )
@@ -191,7 +196,8 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
             return data
 
     async def async_shutdown(self) -> None:
-        """Shutdown coordinator."""
+        """Cancel scheduled refreshes and close the API client."""
+        await super().async_shutdown()
         await self.api.close()
 
     async def async_config_entry_first_refresh(self) -> None:
@@ -347,3 +353,6 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
         """Manual helper for testing power detection from Home Assistant button."""
         _LOGGER.warning("Manual force power probe requested")
         await self.async_request_refresh()
+
+
+type FrontierSiliconConfigEntry = ConfigEntry[FrontierSiliconCoordinator]

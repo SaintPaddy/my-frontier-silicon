@@ -7,7 +7,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_NAME
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import FrontierSiliconAPI
 from .const import DOMAIN, CONF_PIN, DEFAULT_PORT, DEFAULT_PIN
@@ -22,7 +22,7 @@ class FrontierSiliconConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> config_entries.ConfigFlowResult:
         """Handle the initial step."""
         errors = {}
 
@@ -32,6 +32,7 @@ class FrontierSiliconConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 host=user_input[CONF_HOST],
                 port=user_input.get(CONF_PORT, DEFAULT_PORT),
                 pin=user_input.get(CONF_PIN, DEFAULT_PIN),
+                session=async_get_clientsession(self.hass),
             )
 
             try:

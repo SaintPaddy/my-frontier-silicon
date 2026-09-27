@@ -11,7 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
-from .coordinator import FrontierSiliconCoordinator
+from .coordinator import FrontierSiliconConfigEntry, FrontierSiliconCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,11 +29,11 @@ MODE_NAMES = {
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: FrontierSiliconConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Frontier Silicon select entities."""
-    coordinator: FrontierSiliconCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     
     # Only load presets and modes if they were loaded at startup
     # (meaning radio was ON). If radio was OFF, they'll load on first power-on.

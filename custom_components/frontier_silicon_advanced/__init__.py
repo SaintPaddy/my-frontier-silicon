@@ -1,11 +1,9 @@
 """My Frontier Silicon Integration for Home Assistant."""
 import logging
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.const import Platform
 
-from .const import DOMAIN
-from .coordinator import FrontierSiliconCoordinator
+from .coordinator import FrontierSiliconConfigEntry, FrontierSiliconCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,7 +17,7 @@ PLATFORMS = [
 ]
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: FrontierSiliconConfigEntry) -> bool:
     """Set up My Frontier Silicon from a config entry."""
     _LOGGER.info("Setting up My Frontier Silicon integration")
     
@@ -29,9 +27,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Fetch initial data
     await coordinator.async_config_entry_first_refresh()
     
-    # Store coordinator
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = coordinator
+    entry.runtime_data = coordinator
     
     # Setup platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -39,21 +35,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Unload a config entry."""
+async def async_unload_entry(hass: HomeAssistant, entry: FrontierSiliconConfigEntry) -> bool:
+    """Unload a config entry.
+
+    The coordinator is shut down automatically when the entry unloads.
+    """
     _LOGGER.info("Unloading My Frontier Silicon integration")
-    
-    # Get coordinator
-    coordinator = hass.data[DOMAIN].get(entry.entry_id)
-    
-    # Unload platforms
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    
-    if unload_ok:
-        # Shutdown coordinator and close API session
-        if coordinator:
-            _LOGGER.info("Closing API session")
-            await coordinator.async_shutdown()
-        hass.data[DOMAIN].pop(entry.entry_id)
-    
-    return unload_ok
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)

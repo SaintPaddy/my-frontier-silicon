@@ -20,18 +20,18 @@ from .const import (
     PLAY_STATUS_STOPPED,
     PLAY_STATUS_BUFFERING,
 )
-from .coordinator import FrontierSiliconCoordinator
+from .coordinator import FrontierSiliconConfigEntry, FrontierSiliconCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: FrontierSiliconConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Frontier Silicon media player."""
-    coordinator: FrontierSiliconCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     async_add_entities([FrontierSiliconMediaPlayer(coordinator, entry)])
 
 

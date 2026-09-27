@@ -13,13 +13,24 @@ _LOGGER = logging.getLogger(__name__)
 class FrontierSiliconAPI:
     """API client for Frontier Silicon devices."""
 
-    def __init__(self, host: str, port: int, pin: str) -> None:
-        """Initialize the API client."""
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        pin: str,
+        session: Optional[aiohttp.ClientSession] = None,
+    ) -> None:
+        """Initialize the API client.
+
+        Pass Home Assistant's shared session; without one the client creates
+        (and closes) its own.
+        """
         self.host = host
         self.port = port
         self.pin = pin
         self.session_id: Optional[str] = None
-        self._session: Optional[aiohttp.ClientSession] = None
+        self._session: Optional[aiohttp.ClientSession] = session
+        self._owns_session = session is None
 
         if port == 80:
             self.base_url = f"http://{host}/fsapi"
@@ -34,8 +45,8 @@ class FrontierSiliconAPI:
         return self._session
 
     async def close(self) -> None:
-        """Close the aiohttp session."""
-        if self._session and not self._session.closed:
+        """Close the aiohttp session if this client created it."""
+        if self._owns_session and self._session and not self._session.closed:
             await self._session.close()
 
     async def clear_session(self, context: str = "clear_session") -> None:
