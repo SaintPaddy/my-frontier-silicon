@@ -53,8 +53,7 @@ class FrontierSiliconRefreshPresetsButton(CoordinatorEntity, ButtonEntity):
 
         _LOGGER.info("Refreshing presets and modes from device")
         await self.coordinator.refresh_modes()
-        await self.coordinator.get_all_presets()
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.refresh_all_presets()
 
 
 class FrontierSiliconForcePowerProbeButton(CoordinatorEntity, ButtonEntity):

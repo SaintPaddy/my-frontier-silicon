@@ -66,45 +66,57 @@ class FrontierSiliconMultiModePresetSelect(CoordinatorEntity, SelectEntity):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
         )
-        self._preset_map: dict[str, tuple[str, str]] = {}  # {display_name: (mode_id, preset_key)}
+        # {display_name: (mode_id, preset_key, preset_name)}
+        self._preset_map: dict[str, tuple[str, str, str]] = {}
         self._update_preset_map()
+
+    def _mode_name(self, mode_id: str) -> str:
+        """Return the device's label for a mode, falling back to defaults."""
+        for mode in self.coordinator._modes:
+            if mode.get("key") == mode_id:
+                if name := mode.get("label") or mode.get("name"):
+                    return name
+        return MODE_NAMES.get(mode_id, f"Mode {mode_id}")
 
     @callback
     def _update_preset_map(self) -> None:
         """Update the preset mapping from all modes."""
         self._preset_map = {}
         
-        if hasattr(self.coordinator, "_all_presets"):
-            for mode_id, presets in self.coordinator._all_presets.items():
-                mode_name = MODE_NAMES.get(mode_id, f"Mode {mode_id}")
+        for mode_id, presets in self.coordinator._all_presets.items():
+            mode_name = self._mode_name(mode_id)
+            
+            for preset in presets:
+                preset_key = preset.get("key", "")
+                preset_name = preset.get("name", "").strip()
                 
-                for preset in presets:
-                    preset_key = preset.get("key", "")
-                    preset_name = preset.get("name", "").strip()
-                    
-                    # Only include named presets (exclude empty)
-                    if preset_name and preset_name.lower() not in ["unnamed", "", " "]:
-                        # Format: [Radio] 1LIVE
-                        display_name = f"[{mode_name}] {preset_name}"
-                        self._preset_map[display_name] = (mode_id, preset_key)
+                # Only include named presets (exclude empty)
+                if preset_name and preset_name.lower() != "unnamed":
+                    # Format: [Radio] 1LIVE
+                    display_name = f"[{mode_name}] {preset_name}"
+                    self._preset_map[display_name] = (mode_id, preset_key, preset_name)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Rebuild the preset map when coordinator data or presets change."""
+        self._update_preset_map()
+        super()._handle_coordinator_update()
 
     @property
     def options(self) -> list[str]:
         """Return list of available presets across all modes."""
-        self._update_preset_map()
-        return sorted(list(self._preset_map.keys()))
+        return sorted(self._preset_map)
 
     @property
     def current_option(self) -> str | None:
         """Return the current preset."""
         current_mode = self.coordinator.data.get("mode")
-        current_station = self.coordinator.data.get("station_name")
+        # Devices may pad station names with whitespace
+        current_station = (self.coordinator.data.get("station_name") or "").strip()
         
         if current_mode and current_station:
-            mode_name = MODE_NAMES.get(current_mode, f"Mode {current_mode}")
-            # Try to find matching preset
-            for display_name, (mode_id, _) in self._preset_map.items():
-                if mode_id == current_mode and current_station in display_name:
+            for display_name, (mode_id, _, preset_name) in self._preset_map.items():
+                if mode_id == current_mode and preset_name == current_station:
                     return display_name
         
         return None
@@ -121,7 +133,7 @@ class FrontierSiliconMultiModePresetSelect(CoordinatorEntity, SelectEntity):
             _LOGGER.error("Preset %s not found in map", option)
             return
         
-        mode_id, preset_key = self._preset_map[option]
+        mode_id, preset_key, _ = self._preset_map[option]
         
         _LOGGER.info("Selecting preset: %s (mode: %s, key: %s)", option, mode_id, preset_key)
         
@@ -138,11 +150,6 @@ class FrontierSiliconMultiModePresetSelect(CoordinatorEntity, SelectEntity):
         
         # Refresh
         await self.coordinator.async_request_refresh()
-
-    async def async_update(self) -> None:
-        """Update the entity."""
-        await super().async_update()
-        self._update_preset_map()
 
 
 class FrontierSiliconModeSelect(CoordinatorEntity, SelectEntity):

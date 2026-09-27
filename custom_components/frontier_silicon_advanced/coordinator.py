@@ -6,7 +6,7 @@ from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .api import FrontierSiliconAPI
@@ -16,6 +16,7 @@ from .const import (
     CONF_PIN,
     DEFAULT_PORT,
     DEFAULT_PIN,
+    PRESET_MODE_IDS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -57,6 +58,9 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
         self._modes: list[dict[str, str]] = []
         self._all_presets: dict[str, list[dict[str, str]]] = {}
         self._presets: list[dict[str, str]] = []
+        self._preset_lock = asyncio.Lock()
+        # Auto-load is attempted once per power-on cycle
+        self._auto_load_attempted = False
         
         # Get options with defaults
         self._debug_logging = entry.options.get("debug_logging", False)
@@ -236,47 +240,134 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
 
         await super().async_config_entry_first_refresh()
 
-    async def _load_presets_for_mode(self, mode_id: str) -> list[dict[str, str]]:
-        """Load presets for a specific mode, preserving current mode.
-        
-        CRITICAL: This saves and restores the current mode to avoid
-        interrupting the user's listening experience!
-        """
-        if not self._radio_is_known_on():
-            _LOGGER.warning(
-                "Refusing to load presets for mode %s: radio is not confirmed ON",
-                mode_id,
-            )
-            return []
+        # Listeners run after self.data is updated, so the power state seen
+        # there is the freshly polled one.
+        self.entry.async_on_unload(
+            self.async_add_listener(self._async_check_auto_load)
+        )
+        # Radio may already be ON at startup
+        self._async_check_auto_load()
 
-        # CRITICAL: Save current mode before changing it!
-        current_mode = self.data.get("mode")
-        
+    @callback
+    def _async_check_auto_load(self) -> None:
+        """Load modes and presets once a poll confirms the radio is ON."""
+        if not self._radio_is_known_on():
+            self._auto_load_attempted = False
+            return
+        needs_modes = not self._modes
+        needs_presets = self._auto_load_presets and not self._all_presets
+        if self._auto_load_attempted or not (needs_modes or needs_presets):
+            return
+        self._auto_load_attempted = True
+        self.entry.async_create_background_task(
+            self.hass,
+            self._async_auto_load(needs_presets),
+            "frontier_silicon_auto_load",
+        )
+
+    async def _async_auto_load(self, load_presets: bool) -> None:
+        """Load modes (and presets when enabled), then notify entities."""
+        if not self._modes:
+            self._log_info("Radio confirmed ON; loading modes")
+            try:
+                self._modes = await self.api.get_modes()
+            except Exception as err:
+                _LOGGER.warning("Error loading modes: %s", err)
+        if load_presets:
+            self._log_info("Radio confirmed ON; auto-loading presets")
+            await self._async_load_all_presets()
+        self.async_update_listeners()
+
+    def _preset_mode_keys(self) -> list[str]:
+        """Return keys of the modes that support presets on this device.
+
+        Mode keys differ between devices (DAB is "3" on some radios and "2" on
+        others), so match on the mode id or label reported by validModes.
+        """
+        if not self._modes:
+            # Modes unknown; fall back to the most common layout
+            return ["0", "3", "4"]
+
+        keys = []
+        for mode in self._modes:
+            key = mode.get("key")
+            if key is None or mode.get("selectable") == "0":
+                continue
+            mode_id = (mode.get("id") or "").upper()
+            label = (mode.get("label") or "").lower()
+            if (
+                mode_id in PRESET_MODE_IDS
+                or "internet radio" in label
+                or "dab" in label
+                or label == "fm"
+            ):
+                keys.append(key)
+        return keys
+
+    async def _load_presets_for_mode(self, mode_id: str, switch_mode: bool = True) -> list[dict[str, str]]:
+        """Load presets for a specific mode.
+
+        The caller is responsible for restoring the original mode afterwards.
+        """
         try:
-            self._log_info("Loading presets for mode %s (will restore mode %s after)", mode_id, current_mode)
-            
-            # Switch to target mode
-            await self.api.set_mode(mode_id)
-            await asyncio.sleep(0.5)
-            
-            # Load presets (get_presets() handles nav.state internally)
+            if switch_mode:
+                await self.api.set_mode(mode_id)
+                await asyncio.sleep(0.5)
+            # get_presets() handles nav.state internally
             presets = await self.api.get_presets()
-            
+            self._log_info("Loaded %d presets for mode %s", len(presets), mode_id)
             return presets
-            
         except Exception as err:
             _LOGGER.warning("Error loading presets for mode %s: %s", mode_id, err)
             return []
-            
-        finally:
-            # CRITICAL: Always restore original mode!
-            if current_mode and current_mode != mode_id:
-                self._log_info("Restoring original mode %s after preset load", current_mode)
+
+    async def _async_load_all_presets(self) -> dict[str, list[dict[str, str]]]:
+        """Load presets for all preset-capable modes, then restore the mode.
+
+        Presets are read from the current mode first (no switch needed); the
+        original mode is restored once at the end.
+        """
+        async with self._preset_lock:
+            if not self._radio_is_known_on():
+                _LOGGER.warning("Refusing to load presets: radio is not confirmed ON")
+                return self._all_presets
+
+            if not self._modes:
                 try:
-                    await self.api.set_mode(current_mode)
-                    await asyncio.sleep(0.3)
+                    self._modes = await self.api.get_modes()
                 except Exception as err:
-                    _LOGGER.warning("Failed to restore mode %s: %s", current_mode, err)
+                    _LOGGER.warning("Error loading modes before presets: %s", err)
+
+            current_mode = self.data.get("mode")
+            mode_keys = self._preset_mode_keys()
+            if current_mode in mode_keys:
+                mode_keys.remove(current_mode)
+                mode_keys.insert(0, current_mode)
+
+            self._log_info(
+                "Loading presets for modes %s (will restore mode %s after)",
+                mode_keys,
+                current_mode,
+            )
+            all_presets: dict[str, list[dict[str, str]]] = {}
+            switched = False
+            try:
+                for mode_id in mode_keys:
+                    switch_mode = mode_id != current_mode
+                    switched |= switch_mode
+                    presets = await self._load_presets_for_mode(mode_id, switch_mode=switch_mode)
+                    if presets:
+                        all_presets[mode_id] = presets
+            finally:
+                if switched and current_mode:
+                    self._log_info("Restoring original mode %s after preset load", current_mode)
+                    try:
+                        await self.api.set_mode(current_mode)
+                    except Exception as err:
+                        _LOGGER.warning("Failed to restore mode %s: %s", current_mode, err)
+
+            self._all_presets = all_presets
+            return self._all_presets
 
     async def get_all_presets(self) -> dict[str, list[dict[str, str]]]:
         """Get all presets for all modes, guarded by current power state."""
@@ -295,12 +386,15 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
             return self._all_presets
 
         self._log_info("All presets not cached. Radio confirmed ON, loading presets on demand")
-        self._all_presets = {}
-        for mode in ["0", "3", "4"]:
-            presets = await self._load_presets_for_mode(mode)
-            if presets:
-                self._all_presets[mode] = presets
-        return self._all_presets
+        return await self._async_load_all_presets()
+
+    async def refresh_all_presets(self) -> None:
+        """Reload presets for all modes, ignoring the cache."""
+        if not self._radio_is_known_on():
+            _LOGGER.warning("Manual preset refresh ignored: radio is OFF/not confirmed ON")
+            return
+        await self._async_load_all_presets()
+        self.async_update_listeners()
 
     async def get_modes(self) -> list[dict[str, str]]:
         """Get available modes, guarded by current power state."""
