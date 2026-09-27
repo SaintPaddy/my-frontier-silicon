@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Add Frontier Silicon Device",
-        "description": "Configure your Frontier Silicon-based radio",
+        "description": "Enter the connection details for your Frontier Silicon device (e.g., Majority Homerton, Roberts Stream, etc.)",
         "data": {
           "host": "IP Address",
           "port": "Port",
@@ -13,8 +13,97 @@
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect",
-      "unknown": "Unknown error occurred"
+      "cannot_connect": "Failed to connect to the device. Please check the IP address, port, and PIN code.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This device is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Integration Options",
+        "description": "Configure integration behavior and performance",
+        "data": {
+          "debug_logging": "Enable debug logging",
+          "auto_load_presets": "Automatically load presets when radio turns on",
+          "scan_interval_off": "Scan interval when OFF (seconds)",
+          "scan_interval_on": "Scan interval when ON (seconds)"
+        },
+        "data_description": {
+          "debug_logging": "Show detailed debug messages in logs. Enable when troubleshooting.",
+          "auto_load_presets": "Load all radio presets automatically when radio powers on. Disable to load only when manually refreshing.",
+          "scan_interval_off": "How often to check if radio powered on (30-300 seconds). Higher = less network traffic.",
+          "scan_interval_on": "How often to update song info when playing (10-60 seconds). Lower = more responsive."
+        }
+      }
+    }
+  },
+  "entity": {
+    "select": {
+      "preset": {
+        "name": "Preset"
+      },
+      "mode": {
+        "name": "Input Mode"
+      },
+      "equalizer": {
+        "name": "Equalizer"
+      }
+    },
+    "number": {
+      "sleep_timer": {
+        "name": "Sleep Timer"
+      }
+    },
+    "switch": {
+      "bluetooth_mode": {
+        "name": "Bluetooth Mode"
+      },
+      "spotify_mode": {
+        "name": "Spotify Mode"
+      }
+    },
+    "button": {
+      "refresh_presets": {
+        "name": "Refresh Presets"
+      },
+      "force_power_probe": {
+        "name": "Check Power State"
+      }
+    },
+    "sensor": {
+      "current_mode": {
+        "name": "Current Mode"
+      },
+      "current_station": {
+        "name": "Current Station"
+      },
+      "wifi_signal": {
+        "name": "WiFi Signal"
+      },
+      "ip_address": {
+        "name": "IP Address"
+      },
+      "mac_address": {
+        "name": "MAC Address"
+      },
+      "wifi_ssid": {
+        "name": "WiFi SSID"
+      },
+      "sleep_remaining": {
+        "name": "Sleep Timer Remaining"
+      },
+      "firmware_version": {
+        "name": "Firmware Version"
+      },
+      "device_model": {
+        "name": "Device Model"
+      },
+      "volume_percent": {
+        "name": "Volume"
+      }
     }
   }
 }
