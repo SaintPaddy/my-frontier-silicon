@@ -20,6 +20,9 @@ class FrontierSiliconAPI:
         self.pin = pin
         self.session_id: Optional[str] = None
         self._session: Optional[aiohttp.ClientSession] = None
+        # Devices allow a single FSAPI session; creating a second one
+        # invalidates the first, so only one coroutine may create it.
+        self._session_lock = asyncio.Lock()
 
         if port == 80:
             self.base_url = f"http://{host}/fsapi"
@@ -120,16 +123,35 @@ class FrontierSiliconAPI:
         if not allow_create:
             _LOGGER.debug("No FSAPI session and session creation not allowed; context=%s", context)
             return False
-        return await self.create_session(context=context) is not None
+        async with self._session_lock:
+            if self.session_id:
+                # Another request created a session while we were waiting
+                return True
+            return await self.create_session(context=context) is not None
+
+    async def _renew_session(self, stale_sid: Optional[str], context: str) -> bool:
+        """Replace an expired session unless another request already did."""
+        async with self._session_lock:
+            if self.session_id and self.session_id != stale_sid:
+                return True
+            self.session_id = None
+            return await self.create_session(context=context) is not None
 
     async def get_value(self, path: str, *, allow_session_create: bool = True, context: str = "get_value") -> tuple[Optional[str], str]:
         """GET a scalar value from the device."""
         if not await self._ensure_session(allow_create=allow_session_create, context=context):
             return None, "NO_SESSION"
 
-        url = f"{self.base_url}/GET/{path}?pin={self.pin}&sid={self.session_id}"
+        sid = self.session_id
+        url = f"{self.base_url}/GET/{path}?pin={self.pin}&sid={sid}"
         root, _ = await self._request(url, context=context)
         status = self._get_status(root)
+
+        if status in ("FS_SESSION_TIMEOUT", "FS_INVALID_SID") and allow_session_create:
+            if await self._renew_session(sid, context=f"{context}:retry"):
+                url = f"{self.base_url}/GET/{path}?pin={self.pin}&sid={self.session_id}"
+                root, _ = await self._request(url, context=f"{context}:retry")
+                status = self._get_status(root)
 
         if root is None:
             return None, status
@@ -154,13 +176,13 @@ class FrontierSiliconAPI:
 
         _LOGGER.debug("FSAPI SET %s=%s; context=%s", path, value, context)
         encoded_value = quote(str(value))
-        url = f"{self.base_url}/SET/{path}?pin={self.pin}&sid={self.session_id}&value={encoded_value}"
+        sid = self.session_id
+        url = f"{self.base_url}/SET/{path}?pin={self.pin}&sid={sid}&value={encoded_value}"
         root, _ = await self._request(url, context=context)
         status = self._get_status(root)
 
         if status in ("FS_SESSION_TIMEOUT", "FS_INVALID_SID"):
-            self.session_id = None
-            if await self.create_session(context=f"{context}:retry"):
+            if await self._renew_session(sid, context=f"{context}:retry"):
                 url = f"{self.base_url}/SET/{path}?pin={self.pin}&sid={self.session_id}&value={encoded_value}"
                 root, _ = await self._request(url, context=f"{context}:retry")
                 status = self._get_status(root)
@@ -228,8 +250,6 @@ class FrontierSiliconAPI:
     async def power_off(self) -> bool:
         """Turn device off."""
         status = await self.set_value("netRemote.sys.power", "0", context="power_off")
-        if status == "FS_OK":
-            await self.clear_session(context="power_off")
         return status == "FS_OK"
 
     async def set_volume(self, level: int) -> bool:

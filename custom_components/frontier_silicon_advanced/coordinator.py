@@ -131,8 +131,9 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
             )
 
             if not radio_on:
-                self._log_info("Radio is OFF/unknown; skipping detailed data and clearing session")
-                await self.api.clear_session(context="periodic_update_power_off_or_unknown")
+                # Keep the session: re-creating it on every poll disconnects
+                # other clients (UNDOK) and CREATE_SESSION can wake some radios.
+                self._log_info("Radio is OFF/unknown; skipping detailed data")
                 self._update_scan_interval(radio_on)  # Use current state, not old self.data
                 return DEFAULT_OFF_DATA.copy()
 
@@ -232,7 +233,6 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
                 self._modes = []
         else:
             self._log_info("Startup: radio is OFF/unknown. No modes, presets or device details will be loaded")
-            await self.api.clear_session(context="startup_radio_off")
 
         await super().async_config_entry_first_refresh()
 
