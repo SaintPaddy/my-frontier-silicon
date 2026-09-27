@@ -35,8 +35,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     
     # Setup platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # Reload when options change so new scan intervals and settings apply
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
     
     return True
+
+
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload config entry after its options were updated."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
