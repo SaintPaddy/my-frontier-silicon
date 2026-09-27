@@ -5,7 +5,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.const import Platform
 
 from .const import DOMAIN
-from .coordinator import FrontierSiliconCoordinator
+from .coordinator import FrontierSiliconCoordinator, preset_store
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -57,3 +57,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
     
     return unload_ok
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Remove cached presets when the config entry is deleted."""
+    await preset_store(hass, entry.entry_id).async_remove()

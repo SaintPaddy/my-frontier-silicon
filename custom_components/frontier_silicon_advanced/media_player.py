@@ -195,22 +195,7 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
             except Exception as err:
                 _LOGGER.warning("Error loading device info on power-on: %s", err)
         
-        if not self.coordinator._all_presets:
-            _LOGGER.info("Loading presets after first power-on")
-            try:
-                # Load modes
-                self.coordinator._modes = await self.coordinator.api.get_modes()
-                
-                # Load presets for all modes
-                import asyncio
-                for mode in ["0", "3", "4"]:  # Internet Radio, DAB+, FM
-                    mode_presets = await self.coordinator._load_presets_for_mode(mode)
-                    if mode_presets:
-                        self.coordinator._all_presets[mode] = mode_presets
-                        _LOGGER.info("Loaded %d presets for mode %s", len(mode_presets), mode)
-            except Exception as err:
-                _LOGGER.warning("Error loading presets on power-on: %s", err)
-        
+        # Presets auto-load once the next poll confirms the radio is ON
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self) -> None:

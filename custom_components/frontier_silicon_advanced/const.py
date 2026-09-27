@@ -59,6 +59,9 @@ MODE_CD = "6"
 MODE_USB = "7"
 MODE_AUX = "8"
 
+# validModes ids of modes that support presets (keys vary per device)
+PRESET_MODE_IDS = {"IR", "AIRABLE_RADIO", "DAB", "FM"}
+
 # Attribute names
 ATTR_STATION = "station"
 ATTR_MODE = "mode"

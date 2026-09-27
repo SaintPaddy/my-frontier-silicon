@@ -27,13 +27,13 @@
         "description": "Configure integration behavior and performance",
         "data": {
           "debug_logging": "Enable debug logging",
-          "auto_load_presets": "Automatically load presets when radio turns on",
+          "auto_load_presets": "Automatically read presets of the current mode",
           "scan_interval_off": "Scan interval when OFF (seconds)",
           "scan_interval_on": "Scan interval when ON (seconds)"
         },
         "data_description": {
           "debug_logging": "Show detailed debug messages in logs. Enable when troubleshooting.",
-          "auto_load_presets": "Load all radio presets automatically when radio powers on. Disable to load only when manually refreshing.",
+          "auto_load_presets": "Read the presets of the mode the radio is playing in (Internet radio, DAB, FM) without switching modes. Use the Refresh Presets button to load the presets of all modes at once, which briefly switches modes.",
           "scan_interval_off": "How often to check if radio powered on (30-300 seconds). Higher = less network traffic.",
           "scan_interval_on": "How often to update song info when playing (10-60 seconds). Lower = more responsive."
         }
