@@ -1,7 +1,6 @@
 {
   "name": "My Frontier Silicon",
   "content_in_root": false,
-  "filename": "my_frontier_silicon",
   "render_readme": true,
-  "domains": ["media_player", "select", "sensor", "button"]
+  "homeassistant": "2024.11.0"
 }
