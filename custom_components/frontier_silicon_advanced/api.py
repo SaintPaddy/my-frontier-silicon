@@ -10,6 +10,10 @@ import aiohttp
 _LOGGER = logging.getLogger(__name__)
 
 
+class FrontierSiliconConnectionError(Exception):
+    """Raised when the device cannot be reached."""
+
+
 class FrontierSiliconAPI:
     """API client for Frontier Silicon devices."""
 
@@ -52,7 +56,12 @@ class FrontierSiliconAPI:
         return masked
 
     async def _request(self, url: str, timeout: int = 5, context: str = "request") -> tuple[Optional[ET.Element], str]:
-        """Make HTTP request and parse XML response."""
+        """Make HTTP request and parse XML response.
+
+        Raises FrontierSiliconConnectionError when the device does not respond.
+        HTTP error codes and malformed XML are returned as (None, text) since
+        the device itself is reachable.
+        """
         try:
             session = await self._get_session()
             _LOGGER.debug("FSAPI request [%s]: %s", context, self._mask_url(url))
@@ -74,12 +83,12 @@ class FrontierSiliconAPI:
                     _LOGGER.debug("FSAPI XML parse error [%s]: %s; response=%s", context, err, text[:120])
                     return None, text
 
-        except asyncio.TimeoutError:
+        except asyncio.TimeoutError as err:
             _LOGGER.debug("FSAPI timeout [%s]", context)
-            return None, ""
+            raise FrontierSiliconConnectionError(f"Timeout talking to {self.host}") from err
         except aiohttp.ClientError as err:
             _LOGGER.debug("FSAPI connection error [%s]: %s", context, err)
-            return None, ""
+            raise FrontierSiliconConnectionError(f"Cannot connect to {self.host}: {err}") from err
         except Exception as err:
             _LOGGER.error("FSAPI unexpected request error [%s]: %s", context, err)
             return None, ""

@@ -74,11 +74,6 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
         )
 
     @property
-    def available(self) -> bool:
-        """Return if entity is available."""
-        return self.coordinator.data.get("available", False)
-
-    @property
     def state(self) -> MediaPlayerState:
         """Return the state of the device."""
         if not self.coordinator.data.get("power"):

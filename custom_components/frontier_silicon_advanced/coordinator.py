@@ -7,9 +7,9 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import FrontierSiliconAPI
+from .api import FrontierSiliconAPI, FrontierSiliconConnectionError
 from .const import (
     DOMAIN,
     SCAN_INTERVAL,
@@ -22,7 +22,6 @@ _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_OFF_DATA: dict[str, Any] = {
     "power": False,
-    "available": True,
     "volume": 0,
     "volume_steps": 32,
     "mute": False,
@@ -140,7 +139,7 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
             self._update_scan_interval(radio_on)  # Use current state, not old self.data
             
             data = DEFAULT_OFF_DATA.copy()
-            data.update({"power": True, "available": True})
+            data["power"] = True
 
             volume, _ = await self.api.get_value("netRemote.sys.audio.volume", context="details:volume")
             mute, _ = await self.api.get_value("netRemote.sys.audio.mute", context="details:mute")
@@ -183,12 +182,12 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
 
             return data
 
+        except FrontierSiliconConnectionError as err:
+            await self.api.clear_session(context="update_unreachable")
+            raise UpdateFailed(str(err)) from err
         except Exception as err:
-            _LOGGER.warning("Error communicating with device: %s", err)
             await self.api.clear_session(context="update_exception")
-            data = DEFAULT_OFF_DATA.copy()
-            data["available"] = False
-            return data
+            raise UpdateFailed(f"Error communicating with device: {err}") from err
 
     async def async_shutdown(self) -> None:
         """Shutdown coordinator."""
@@ -205,10 +204,16 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
         self._all_presets = {}
         self._presets = []
 
-        radio_on, _ = await self._probe_power(
-            context="startup_power_check",
-            allow_session_create=True,
-        )
+        try:
+            radio_on, _ = await self._probe_power(
+                context="startup_power_check",
+                allow_session_create=True,
+            )
+        except FrontierSiliconConnectionError as err:
+            # The refresh below fails too and raises ConfigEntryNotReady,
+            # so Home Assistant retries setup later.
+            self._log_info("Startup: device unreachable: %s", err)
+            radio_on = False
 
         if radio_on:
             self._log_info("Startup: radio is ON. Loading device info and modes")
