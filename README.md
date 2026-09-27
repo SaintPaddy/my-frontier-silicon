@@ -42,7 +42,7 @@ The built-in Home Assistant Frontier Silicon integration is basic and doesn't ex
 
 ### Manual Installation
 
-1. Copy the `custom_components/my_frontier_silicon` folder to your Home Assistant `custom_components` directory
+1. Copy the `custom_components/frontier_silicon_advanced` folder to your Home Assistant `custom_components` directory
 2. Restart Home Assistant
 
 ## Configuration

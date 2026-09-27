@@ -95,23 +95,23 @@ You should see entities like:
 
 ### Step 2: Copy Files
 
-Copy the `custom_components/my_frontier_silicon` folder to your Home Assistant installation:
+Copy the `custom_components/frontier_silicon_advanced` folder to your Home Assistant installation:
 
 **Docker:**
 ```bash
 # From extracted folder
-scp -r custom_components/my_frontier_silicon user@homeassistant:/config/custom_components/
+scp -r custom_components/frontier_silicon_advanced user@homeassistant:/config/custom_components/
 ```
 
 **Home Assistant OS:**
 1. Use **File Editor** add-on or **Samba share**
 2. Navigate to `/config/custom_components/`
-3. Create folder: `my_frontier_silicon`
+3. Create folder: `frontier_silicon_advanced`
 4. Copy all files into this folder
 
 **Supervised:**
 ```bash
-sudo cp -r custom_components/my_frontier_silicon /usr/share/hassio/homeassistant/custom_components/
+sudo cp -r custom_components/frontier_silicon_advanced /usr/share/hassio/homeassistant/custom_components/
 ```
 
 ### Step 3: Verify Structure
@@ -120,7 +120,7 @@ Your folder structure should be:
 ```
 /config/
 └── custom_components/
-    └── my_frontier_silicon/
+    └── frontier_silicon_advanced/
         ├── __init__.py
         ├── api.py
         ├── button.py
@@ -273,7 +273,7 @@ The integration uses IP address as unique identifier:
 ### Manual Update
 
 1. Download new version
-2. Replace all files in `custom_components/my_frontier_silicon/`
+2. Replace all files in `custom_components/frontier_silicon_advanced/`
 3. Restart Home Assistant
 
 **Note:** Your configuration is preserved - no need to reconfigure!
@@ -341,7 +341,7 @@ See README.md for automation examples
 
 Delete folder:
 ```bash
-rm -rf /config/custom_components/my_frontier_silicon
+rm -rf /config/custom_components/frontier_silicon_advanced
 ```
 
 Then restart Home Assistant.

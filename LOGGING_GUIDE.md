@@ -10,7 +10,7 @@
 logger:
   default: warning
   logs:
-    custom_components.my_frontier_silicon: debug
+    custom_components.frontier_silicon_advanced: debug
 ```
 
 **Then restart Home Assistant**
@@ -55,7 +55,7 @@ logger:
 ```yaml
 logger:
   logs:
-    custom_components.my_frontier_silicon: debug
+    custom_components.frontier_silicon_advanced: debug
 ```
 
 **Options:**
@@ -79,7 +79,7 @@ Debug logging: OFF
 # configuration.yaml - keep minimal
 logger:
   default: warning
-  # Don't set my_frontier_silicon here
+  # Don't set frontier_silicon_advanced here
 ```
 
 ```
@@ -98,9 +98,9 @@ Debug logging: ON
 # configuration.yaml - only if needed
 logger:
   logs:
-    custom_components.my_frontier_silicon: debug
-    custom_components.my_frontier_silicon.api: debug
-    custom_components.my_frontier_silicon.coordinator: debug
+    custom_components.frontier_silicon_advanced: debug
+    custom_components.frontier_silicon_advanced.api: debug
+    custom_components.frontier_silicon_advanced.coordinator: debug
 ```
 
 ---
@@ -181,7 +181,7 @@ INFO: [DEBUG] Finished fetching in 0.1s
 
 **configuration.yaml:**
 ```yaml
-# Don't add my_frontier_silicon logging config
+# Don't add frontier_silicon_advanced logging config
 ```
 
 **Options:**
@@ -231,7 +231,7 @@ Settings → Integrations → Configure
 logger:
   default: info
   logs:
-    custom_components.my_frontier_silicon: debug
+    custom_components.frontier_silicon_advanced: debug
 ```
 
 **Options:**
@@ -256,16 +256,16 @@ logger:
   default: warning
   logs:
     # Only API calls
-    custom_components.my_frontier_silicon.api: debug
+    custom_components.frontier_silicon_advanced.api: debug
     
     # Only coordinator
-    custom_components.my_frontier_silicon.coordinator: debug
+    custom_components.frontier_silicon_advanced.coordinator: debug
     
     # Only config flow
-    custom_components.my_frontier_silicon.config_flow: debug
+    custom_components.frontier_silicon_advanced.config_flow: debug
     
     # Everything else: INFO
-    custom_components.my_frontier_silicon: info
+    custom_components.frontier_silicon_advanced: info
 ```
 
 **Useful for:**
