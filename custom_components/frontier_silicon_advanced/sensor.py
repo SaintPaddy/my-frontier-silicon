@@ -427,9 +427,10 @@ class FrontierSiliconVolumePercentSensor(CoordinatorEntity, SensorEntity):
         if volume is not None and volume_steps:
             try:
                 volume_int = int(volume)
-                steps_int = int(volume_steps)
-                if steps_int > 0:
-                    percentage = round((volume_int / steps_int) * 100)
+                # volumeSteps is the number of steps; max value is steps-1
+                max_volume = int(volume_steps) - 1
+                if max_volume > 0:
+                    percentage = round((volume_int / max_volume) * 100)
                     return percentage
             except (ValueError, TypeError, ZeroDivisionError):
                 pass

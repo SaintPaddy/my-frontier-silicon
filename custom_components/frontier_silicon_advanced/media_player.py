@@ -101,11 +101,20 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
     def volume_level(self) -> float | None:
         """Volume level of the media player (0..1)."""
         volume = self.coordinator.data.get("volume", 0)
-        volume_steps = self.coordinator.data.get("volume_steps", 32)
-        
-        if volume_steps > 0:
-            return volume / volume_steps
+        max_volume = self._max_volume
+
+        if max_volume > 0:
+            return min(volume / max_volume, 1.0)
         return 0.0
+
+    @property
+    def _max_volume(self) -> int:
+        """Highest volume value the device accepts.
+
+        volumeSteps is the number of steps, so values range 0..steps-1.
+        """
+        volume_steps = self.coordinator.data.get("volume_steps", 32)
+        return max(volume_steps - 1, 0)
 
     @property
     def is_volume_muted(self) -> bool:
@@ -220,18 +229,16 @@ class FrontierSiliconMediaPlayer(CoordinatorEntity, MediaPlayerEntity):
 
     async def async_set_volume_level(self, volume: float) -> None:
         """Set volume level, range 0..1."""
-        volume_steps = self.coordinator.data.get("volume_steps", 32)
-        target_volume = int(volume * volume_steps)
-        
+        target_volume = round(volume * self._max_volume)
+
         await self.coordinator.api.set_volume(target_volume)
         await self.coordinator.async_request_refresh()
 
     async def async_volume_up(self) -> None:
         """Volume up the media player."""
         current_volume = self.coordinator.data.get("volume", 0)
-        volume_steps = self.coordinator.data.get("volume_steps", 32)
-        
-        if current_volume < volume_steps:
+
+        if current_volume < self._max_volume:
             await self.coordinator.api.set_volume(current_volume + 1)
             await self.coordinator.async_request_refresh()
 
