@@ -20,6 +20,8 @@ class FrontierSiliconAPI:
         self.pin = pin
         self.session_id: Optional[str] = None
         self._session: Optional[aiohttp.ClientSession] = None
+        # Unknown until the first GET_MULTIPLE; older firmwares lack it
+        self._get_multiple_supported: Optional[bool] = None
 
         if port == 80:
             self.base_url = f"http://{host}/fsapi"
@@ -134,18 +136,67 @@ class FrontierSiliconAPI:
         if root is None:
             return None, status
 
-        value_elem = root.find(".//value")
-        if value_elem is not None:
-            for child in value_elem:
-                if child.text is not None:
-                    _LOGGER.debug("FSAPI GET %s => %s; status=%s; context=%s", path, child.text, status, context)
-                    return child.text, status
-            if value_elem.text:
-                _LOGGER.debug("FSAPI GET %s => %s; status=%s; context=%s", path, value_elem.text, status, context)
-                return value_elem.text, status
+        value = self._extract_value(root.find(".//value"))
+        if value is not None:
+            _LOGGER.debug("FSAPI GET %s => %s; status=%s; context=%s", path, value, status, context)
+            return value, status
 
         _LOGGER.debug("FSAPI GET %s returned no value; status=%s; context=%s", path, status, context)
         return None, status
+
+    @staticmethod
+    def _extract_value(value_elem: Optional[ET.Element]) -> Optional[str]:
+        """Return the text of a <value> element's typed child (u8, c8_array, ...)."""
+        if value_elem is None:
+            return None
+        for child in value_elem:
+            if child.text is not None:
+                return child.text
+        return value_elem.text or None
+
+    async def get_multiple(self, paths: list[str], *, context: str = "get_multiple") -> dict[str, Optional[str]]:
+        """GET several scalar values in one request.
+
+        Falls back to individual GETs on firmwares without GET_MULTIPLE.
+        """
+        if self._get_multiple_supported is not False:
+            result = await self._get_multiple(paths, context=context)
+            if result is not None:
+                self._get_multiple_supported = True
+                return result
+            # A cleared session means it expired; that says nothing about support
+            if self._get_multiple_supported is None and self.session_id is not None:
+                _LOGGER.info("Device does not support GET_MULTIPLE; using individual requests")
+                self._get_multiple_supported = False
+
+        values: dict[str, Optional[str]] = {}
+        for path in paths:
+            values[path], _ = await self.get_value(path, context=f"{context}:{path}")
+        return values
+
+    async def _get_multiple(self, paths: list[str], *, context: str) -> Optional[dict[str, Optional[str]]]:
+        """Issue a GET_MULTIPLE request; None when the device does not support it."""
+        if not await self._ensure_session(allow_create=True, context=context):
+            return {path: None for path in paths}
+
+        nodes = "&".join(f"node={path}" for path in paths)
+        url = f"{self.base_url}/GET_MULTIPLE?pin={self.pin}&sid={self.session_id}&{nodes}"
+        root, _ = await self._request(url, context=context)
+        responses = root.findall("fsapiResponse") if root is not None else []
+        if not responses:
+            if root is not None and self._get_status(root) in ("FS_SESSION_TIMEOUT", "FS_INVALID_SID"):
+                # The individual GETs of the fallback create a new session
+                self.session_id = None
+            return None
+
+        values: dict[str, Optional[str]] = {path: None for path in paths}
+        for response in responses:
+            node = response.findtext("node")
+            status = (response.findtext("status") or "").strip()
+            if node in values and status == "FS_OK":
+                values[node] = self._extract_value(response.find("value"))
+        _LOGGER.debug("FSAPI GET_MULTIPLE => %s; context=%s", values, context)
+        return values
 
     async def set_value(self, path: str, value: str, *, context: str = "set_value") -> str:
         """SET a value on the device."""

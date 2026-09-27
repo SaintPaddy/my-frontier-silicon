@@ -41,6 +41,26 @@ DEFAULT_OFF_DATA: dict[str, Any] = {
     "mac_address": None,
 }
 
+# Values fetched on every poll while the radio is ON: {data key: FSAPI node}
+DETAIL_NODES: dict[str, str] = {
+    "volume": "netRemote.sys.audio.volume",
+    "mute": "netRemote.sys.audio.mute",
+    "mode": "netRemote.sys.mode",
+    "play_status": "netRemote.play.status",
+    "station_name": "netRemote.play.info.name",
+    "station_text": "netRemote.play.info.text",
+    "artist": "netRemote.play.info.artist",
+    "album": "netRemote.play.info.album",
+    "graphic_uri": "netRemote.play.info.graphicUri",
+    "volume_steps": "netRemote.sys.caps.volumeSteps",
+    "sleep_timer": "netRemote.sys.sleep",
+    "eq_preset": "netRemote.sys.audio.eqPreset",
+    "wifi_rssi": "netRemote.sys.net.wlan.rssi",
+    "wifi_ssid": "netRemote.sys.net.wlan.connectedSSID",
+    "ip_address": "netRemote.sys.net.ipConfig.address",
+    "mac_address": "netRemote.sys.net.wlan.macAddress",
+}
+
 
 class FrontierSiliconCoordinator(DataUpdateCoordinator):
     """Class to manage fetching data from the Frontier Silicon device."""
@@ -142,40 +162,15 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
             data = DEFAULT_OFF_DATA.copy()
             data.update({"power": True, "available": True})
 
-            volume, _ = await self.api.get_value("netRemote.sys.audio.volume", context="details:volume")
-            mute, _ = await self.api.get_value("netRemote.sys.audio.mute", context="details:mute")
-            mode, _ = await self.api.get_value("netRemote.sys.mode", context="details:mode")
-            play_status, _ = await self.api.get_value("netRemote.play.status", context="details:play_status")
-            station_name, _ = await self.api.get_value("netRemote.play.info.name", context="details:station_name")
-            station_text, _ = await self.api.get_value("netRemote.play.info.text", context="details:station_text")
-            artist, _ = await self.api.get_value("netRemote.play.info.artist", context="details:artist")
-            album, _ = await self.api.get_value("netRemote.play.info.album", context="details:album")
-            graphic_uri, _ = await self.api.get_value("netRemote.play.info.graphicUri", context="details:graphic_uri")
-            volume_steps, _ = await self.api.get_value("netRemote.sys.caps.volumeSteps", context="details:volume_steps")
-            sleep_timer, _ = await self.api.get_value("netRemote.sys.sleep", context="details:sleep_timer")
-            eq_preset, _ = await self.api.get_value("netRemote.sys.audio.eqPreset", context="details:eq_preset")
-            wifi_rssi, _ = await self.api.get_value("netRemote.sys.net.wlan.rssi", context="details:wifi_rssi")
-            wifi_ssid, _ = await self.api.get_value("netRemote.sys.net.wlan.connectedSSID", context="details:wifi_ssid")
-            ip_address, _ = await self.api.get_value("netRemote.sys.net.ipConfig.address", context="details:ip_address")
-            mac_address, _ = await self.api.get_value("netRemote.sys.net.wlan.macAddress", context="details:mac_address")
+            values = await self.api.get_multiple(list(DETAIL_NODES.values()), context="details")
+            raw = {key: values.get(node) for key, node in DETAIL_NODES.items()}
 
+            data.update(raw)
             data.update({
-                "volume": int(volume) if volume else 0,
-                "volume_steps": int(volume_steps) if volume_steps else 32,
-                "mute": mute == "1",
-                "mode": mode,
-                "play_status": play_status,
-                "station_name": station_name,
-                "station_text": station_text,
-                "artist": artist,
-                "album": album,
-                "graphic_uri": graphic_uri,
-                "sleep_timer": int(sleep_timer) if sleep_timer else 0,
-                "eq_preset": eq_preset,
-                "wifi_rssi": wifi_rssi,
-                "wifi_ssid": wifi_ssid,
-                "ip_address": ip_address,
-                "mac_address": mac_address,
+                "volume": int(raw["volume"]) if raw["volume"] else 0,
+                "volume_steps": int(raw["volume_steps"]) if raw["volume_steps"] else 32,
+                "mute": raw["mute"] == "1",
+                "sleep_timer": int(raw["sleep_timer"]) if raw["sleep_timer"] else 0,
             })
 
             if self._device_info:
