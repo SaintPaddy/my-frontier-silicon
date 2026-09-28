@@ -15,17 +15,6 @@ from .coordinator import FrontierSiliconCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-# Mode ID to name mapping
-MODE_NAMES = {
-    "0": "Radio",
-    "1": "Spotify",
-    "2": "Music",
-    "3": "DAB+",
-    "4": "FM",
-    "5": "Bluetooth",
-    "6": "AUX",
-}
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -76,7 +65,14 @@ class FrontierSiliconMultiModePresetSelect(CoordinatorEntity, SelectEntity):
         
         if hasattr(self.coordinator, "_all_presets"):
             for mode_id, presets in self.coordinator._all_presets.items():
-                mode_name = MODE_NAMES.get(mode_id, f"Mode {mode_id}")
+                mode_name = next(
+                    (
+                        mode.get("label") or mode.get("name")
+                        for mode in self.coordinator._modes
+                        if mode.get("key") == mode_id
+                    ),
+                    None,
+                ) or f"Mode {mode_id}"
                 
                 for preset in presets:
                     preset_key = preset.get("key", "")
@@ -98,15 +94,20 @@ class FrontierSiliconMultiModePresetSelect(CoordinatorEntity, SelectEntity):
     def current_option(self) -> str | None:
         """Return the current preset."""
         current_mode = self.coordinator.data.get("mode")
-        current_station = self.coordinator.data.get("station_name")
-        
+        current_station = (
+            self.coordinator.data.get("station_name") or ""
+        ).strip()
+    
         if current_mode and current_station:
-            mode_name = MODE_NAMES.get(current_mode, f"Mode {current_mode}")
             # Try to find matching preset
             for display_name, (mode_id, _) in self._preset_map.items():
-                if mode_id == current_mode and current_station in display_name:
+                if mode_id != current_mode:
+                    continue
+    
+                preset_name = display_name.split("] ", 1)[-1].strip()
+                if current_station == preset_name:
                     return display_name
-        
+    
         return None
 
     @property

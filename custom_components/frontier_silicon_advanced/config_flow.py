@@ -87,25 +87,34 @@ class FrontierSiliconConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         """Get the options flow for this handler."""
-        return FrontierSiliconOptionsFlowHandler(config_entry)
+        return FrontierSiliconOptionsFlowHandler()
 
 
 class FrontierSiliconOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle options flow for Frontier Silicon."""
 
-    def __init__(self, config_entry):
-        """Initialize options flow."""
-        self.config_entry = config_entry
-
     async def async_step_init(self, user_input=None):
         """Manage the options."""
         if user_input is not None:
+            # Host is config data rather than an integration option.
+            new_data = dict(self.config_entry.data)
+            new_data[CONF_HOST] = user_input.pop(CONF_HOST)
+    
+            self.hass.config_entries.async_update_entry(
+                self.config_entry,
+                data=new_data,
+            )
+    
             return self.async_create_entry(title="", data=user_input)
 
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
                 {
+                    vol.Required(
+                        CONF_HOST,
+                        default=self.config_entry.data.get(CONF_HOST),
+                    ): str,
                     vol.Optional(
                         "debug_logging",
                         default=self.config_entry.options.get("debug_logging", False),

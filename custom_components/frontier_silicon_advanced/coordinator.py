@@ -296,10 +296,30 @@ class FrontierSiliconCoordinator(DataUpdateCoordinator):
 
         self._log_info("All presets not cached. Radio confirmed ON, loading presets on demand")
         self._all_presets = {}
-        for mode in ["0", "3", "4"]:
-            presets = await self._load_presets_for_mode(mode)
-            if presets:
-                self._all_presets[mode] = presets
+        
+        # Discover preset-capable radio modes from the device rather than
+        # assuming fixed mode IDs, which vary between Frontier Silicon devices.
+        if not self._modes:
+            self._modes = await self.api.get_modes()
+        
+        for mode in self._modes:
+            mode_id = mode.get("key")
+            mode_name = (mode.get("label") or mode.get("name") or "").strip().lower()
+        
+            if not mode_id:
+                continue
+        
+            # Presets are relevant to radio tuner/source modes.
+            if (
+                "internet radio" in mode_name
+                or mode_name == "radio"
+                or "dab" in mode_name
+                or mode_name == "fm"
+            ):
+                presets = await self._load_presets_for_mode(mode_id)
+                if presets:
+                    self._all_presets[mode_id] = presets
+        
         return self._all_presets
 
     async def get_modes(self) -> list[dict[str, str]]:
